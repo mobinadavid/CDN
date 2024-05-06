@@ -20,9 +20,9 @@ services:
   # Minio
   minio:
     image: minio/minio:latest
-    container_name: minio.{$APP_HOST}
+    container_name: minio.${APP_HOST}
     restart: unless-stopped
-    command: server /data --address ${MINIO_API_PORT} --console-address ${MINIO_UI_PORT}
+    command: server /data --address :${MINIO_API_PORT} --console-address :${MINIO_UI_PORT}
     tty: true
     ports:
       - 9000:9000
