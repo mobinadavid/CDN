@@ -1,0 +1,64 @@
+# Services
+services:
+  # App
+  app:
+    build:
+      context: .
+      dockerfile: build/docker/app/Dockerfile
+    container_name: app.${APP_HOST}
+    restart: unless-stopped
+    volumes:
+      - ./build/certs/app:/etc/ssl/fund-app/certs:ro
+    tty: true
+    environment:
+      TZ: ${APP_TZ}
+    depends_on:
+      minio:
+        condition: service_healthy
+    networks:
+      - cdn
+  # Minio
+  minio:
+    image: minio/minio:latest
+    container_name: minio.{$APP_HOST}
+    restart: unless-stopped
+    command: server /data --address ${MINIO_API_PORT} --console-address ${MINIO_UI_PORT}
+    tty: true
+    ports:
+      - 9000:9000
+      - 9001:9001
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER:-root}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:-myawesomepassword}
+      TZ: ${APP_TZ}
+    healthcheck:
+      test: [ "CMD", "mc", "ready", "local" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    volumes:
+      - minio:/data
+    networks:
+      - cdn
+  # Nginx
+  nginx:
+    image: nginx:stable-alpine
+    container_name: nginx.{APP_HOST}
+    restart: unless-stopped
+    environment:
+      TZ: ${APP_TZ}
+    tty: true
+    depends_on:
+      - app
+    ports:
+      - 8250:8250
+      - 8251:8251
+    networks:
+      - cdn
+# Volumes
+volumes:
+  minio:
+# Networks
+networks:
+  cdn:
+    driver: bridge

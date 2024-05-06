@@ -1,0 +1,85 @@
+package api
+
+import (
+	"cdn/src/api/http/middlewares"
+	"cdn/src/config"
+	"fmt"
+	"github.com/gin-gonic/gin"
+	"golang.org/x/sync/errgroup"
+	"log"
+)
+
+var (
+	configs      = config.GetInstance()
+	isProduction = configs.Get("APP_ENV") == "production"
+	g            errgroup.Group
+)
+
+func Init() (err error) {
+
+	g.Go(func() error {
+		return initAdminServer()
+	})
+
+	if err = g.Wait(); err != nil {
+		log.Fatalln(err)
+		return err
+	}
+
+	return err
+}
+
+func getNewRouter() *gin.Engine {
+
+	// set gin to release mode.
+	gin.SetMode(gin.ReleaseMode)
+
+	// Initialize new app.
+	router := gin.New()
+
+	// Attach CORS middleware.
+	router.Use(middlewares.Cors())
+
+	// Attach logger middleware.
+	router.Use(gin.Logger())
+
+	// Attach recovery middleware.
+	router.Use(gin.Recovery())
+
+	// Attach request id middleware.
+	router.Use(middlewares.RequestID)
+
+	if isProduction {
+
+		// Trusted proxies.
+		_ = router.SetTrustedProxies([]string{"https://" + configs.Get("APP_HOST")})
+
+	}
+
+	return router
+}
+
+func initAdminServer() error {
+	router := getNewRouter()
+
+	v1 := router.Group("api/v1")
+	{
+		admins.RegisterAuthenticationRouter(v1)
+		admins.RegisterAccessTokensRouter(v1)
+		admins.RegisterAuthorizationRouter(v1)
+		admins.RegisterUserRouter(v1)
+		admins.RegisterBankAccountRouter(v1)
+		admins.RegisterRayanRoutes(v1)
+	}
+
+	// Run App.
+	if err := router.RunTLS(
+		fmt.Sprintf(":%s", configs.Get("ADMIN_APP_PORT")),
+		configs.Get("SSL_CERT_PATH"),
+		configs.Get("SSL_KEY_PATH"),
+	); err != nil {
+		return err
+	}
+
+	return nil
+}
