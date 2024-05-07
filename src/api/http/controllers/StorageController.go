@@ -4,18 +4,15 @@ import (
 	"cdn/src/api/http/response"
 	"cdn/src/pkg/minio"
 	"cdn/src/pkg/utils"
+	"context"
 	"github.com/gin-gonic/gin"
 	minio2 "github.com/minio/minio-go/v7"
+	"io"
 	"net/http"
-	"time"
+	"strconv"
 )
 
 var bucketName = "paresh" //todo: hard-coded
-
-type UploadInfo struct {
-	FileName string `json:"fileName"`
-	URL      string `json:"url"`
-}
 
 type StorageController struct {
 	minio *minio.Client
@@ -35,14 +32,14 @@ func (storageController *StorageController) PutObject(c *gin.Context) {
 		return
 	}
 
-	err = utils.ValidateFiles(form.File["files"])
+	err = utils.ValidateFiles(form.File["files[]"])
 
 	if err != nil {
-		response.Api(c).SetStatusCode(http.StatusUnprocessableEntity).Send()
+		response.Api(c).SetMessage(err.Error()).SetStatusCode(http.StatusUnprocessableEntity).Send()
 		return
 	}
 
-	var uploadInfoList []UploadInfo
+	var uploadInfoList []map[string]string
 
 	for _, file := range form.File["files[]"] {
 		src, err := file.Open()
@@ -67,20 +64,11 @@ func (storageController *StorageController) PutObject(c *gin.Context) {
 			return
 		}
 
-		preSignedURL, err := storageController.minio.GetMinio().PresignedGetObject(c, bucketName, uuidFileName, (7*24)*time.Hour, nil)
-
-		if err != nil {
-			response.Api(c).
-				SetMessage(err.Error()).
-				SetStatusCode(http.StatusInternalServerError).
-				Send()
-
-			return
-		}
-
-		uploadInfoList = append(uploadInfoList, UploadInfo{
-			FileName: uuidFileName,
-			URL:      preSignedURL.String(),
+		uploadInfoList = append(uploadInfoList, map[string]string{
+			"original_file_name": file.Filename,
+			"size":               strconv.FormatInt(file.Size, 10),
+			"file_name":          uuidFileName,
+			"url":                c.GetHeader("Scheme") + c.Request.Host + "/api/v1/storage/" + uuidFileName,
 		})
 	}
 
@@ -90,7 +78,33 @@ func (storageController *StorageController) PutObject(c *gin.Context) {
 		SetData(map[string]interface{}{
 			"uploads": uploadInfoList,
 		}).Send()
-
 	return
+}
 
+func (storageController *StorageController) GetObject(c *gin.Context) {
+	fileName := c.Param("fileName")
+	file, err := storageController.minio.GetMinio().GetObject(context.Background(), bucketName, fileName, minio2.GetObjectOptions{})
+
+	if err != nil {
+		response.Api(c).SetStatusCode(http.StatusNotFound).Send()
+		return
+	}
+	defer file.Close()
+
+	stat, err := file.Stat()
+	if err != nil {
+		response.Api(c).SetStatusCode(http.StatusNotFound).Send()
+		return
+	}
+
+	c.Header("Content-Disposition", "attachment; filename="+fileName)
+	c.Header("Content-Type", stat.ContentType)
+	c.Header("Content-Length", strconv.FormatInt(stat.Size, 10))
+
+	_, err = io.Copy(c.Writer, file)
+
+	if err != nil {
+		response.Api(c).SetStatusCode(http.StatusInternalServerError).Send()
+		return
+	}
 }
