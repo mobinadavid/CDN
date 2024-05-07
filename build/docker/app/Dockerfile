@@ -13,7 +13,7 @@ COPY . /cdn
 # Install Dependencies
 RUN --mount=type=cache,target=/go/pkg/mod/cache \
     --mount=type=cache,target=/go-build \
-    go mod download
+    GOPROXY=https://goproxy.cn go mod download
 
 # Build the binary
 RUN --mount=type=cache,target=/go/pkg/mod/cache \
