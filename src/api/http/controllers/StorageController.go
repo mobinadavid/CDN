@@ -62,7 +62,7 @@ func (storageController *StorageController) PutObject(c *gin.Context) {
 			return
 		}
 
-		presignedURL, err := storageController.minio.GetMinio().PresignedGetObject(c, bucketName, uuidFileName, 8*time.Hour, nil)
+		preSignedURL, err := storageController.minio.GetMinio().PresignedGetObject(c, bucketName, uuidFileName, 8*time.Hour, nil)
 
 		if err != nil {
 			response.Api(c).
@@ -75,7 +75,7 @@ func (storageController *StorageController) PutObject(c *gin.Context) {
 
 		uploadInfoList = append(uploadInfoList, UploadInfo{
 			FileName: uuidFileName,
-			URL:      presignedURL.String(),
+			URL:      preSignedURL.String(),
 		})
 	}
 
