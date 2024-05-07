@@ -9,12 +9,21 @@ import (
 	"strings"
 )
 
+func GenerateUUIDFileName(originalFileName string) string {
+	ext := filepath.Ext(originalFileName)
+	uuidFileName := uuid.NewString() + ext
+	return uuidFileName
+}
+
 func ValidateFiles(files []*multipart.FileHeader) error {
-	log.Println(files)
 	allowedExts := []string{".jpg", ".jpeg", ".png", ".pdf", "zip", "rar", "docx", "doc", "csv", "xlsx", "mkv", "mp4"}
 
 	for _, file := range files {
+		log.Println(file)
+
 		ext := strings.ToLower(strings.TrimSpace(filepath.Ext(file.Filename)))
+
+		log.Println(ext)
 
 		// Check if file extension is allowed
 		valid := false
@@ -30,10 +39,4 @@ func ValidateFiles(files []*multipart.FileHeader) error {
 	}
 
 	return nil
-}
-
-func GenerateUUIDFileName(originalFileName string) string {
-	ext := filepath.Ext(originalFileName)
-	uuidFileName := uuid.NewString() + ext
-	return uuidFileName
 }

@@ -28,9 +28,14 @@ func NewStorageController() *StorageController {
 }
 
 func (storageController *StorageController) PutObject(c *gin.Context) {
-	form, _ := c.MultipartForm()
+	form, err := c.MultipartForm()
 
-	err := utils.ValidateFiles(form.File["files"])
+	if err != nil {
+		response.Api(c).SetStatusCode(http.StatusUnprocessableEntity).Send()
+		return
+	}
+
+	err = utils.ValidateFiles(form.File["files"])
 
 	if err != nil {
 		response.Api(c).SetStatusCode(http.StatusUnprocessableEntity).Send()
@@ -62,7 +67,7 @@ func (storageController *StorageController) PutObject(c *gin.Context) {
 			return
 		}
 
-		preSignedURL, err := storageController.minio.GetMinio().PresignedGetObject(c, bucketName, uuidFileName, 8*time.Hour, nil)
+		preSignedURL, err := storageController.minio.GetMinio().PresignedGetObject(c, bucketName, uuidFileName, (7*24)*time.Hour, nil)
 
 		if err != nil {
 			response.Api(c).
