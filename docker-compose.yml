@@ -5,7 +5,7 @@ services:
     build:
       context: .
       dockerfile: build/docker/app/Dockerfile
-    container_name: app
+    container_name: app.$APP_HOST
     restart: unless-stopped
     volumes:
       - ./build/certs/app:/etc/ssl/fund-app/certs:ro
@@ -20,7 +20,7 @@ services:
   # Minio
   minio:
     image: minio/minio:latest
-    container_name: minio
+    container_name: minio.$APP_HOST
     restart: unless-stopped
     command: server /data --address :${MINIO_API_PORT} --console-address :${MINIO_UI_PORT}
     tty: true
@@ -43,16 +43,22 @@ services:
   # Nginx
   nginx:
     image: nginx:stable-alpine
-    container_name: nginx
+    container_name: nginx.$APP_HOST
     restart: unless-stopped
     environment:
       TZ: ${APP_TZ}
+      SERVER_NAME: ${APP_HOST}
+      SERVER_PORT: 8250
+      PROXY_PASS: https://app.{APP_HOST}:${APP_PORT}
     tty: true
     depends_on:
       - app
     ports:
       - 8250:8250
       - 8251:8251
+    volumes:
+      - ./build/certs/nginx:/etc/nginx/certs:ro
+      - ./build/docker/nginx:/etc/nginx/templates:ro
     networks:
       - cdn
 # Volumes

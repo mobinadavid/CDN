@@ -1,0 +1,19 @@
+stages:
+  - release
+
+# Release stage
+release:
+  stage: release
+  script:
+    - export https_proxy=127.0.0.1:10809 #TODO: temp v2ray for 7 tir server
+    - cd $CI_PROJECT_DIR
+    - cp .env.example .env
+    - sed -i "s/APP_HOST=.*/APP_HOST=$APP_HOST/g" .env
+    - sed -i "s/MINIO_HOST=.*/MINIO_HOST=$MINIO_HOST/g" .env
+    - mkdir -p build/certs/{app,nginx,minio}
+    - cp /etc/letsencrypt/live/cdn.omaxplatform.com/* build/certs/app
+    - cp /etc/letsencrypt/live/cdn.omaxplatform.com/* build/certs/nginx
+#    - docker compose down
+    - docker compose up -d --build
+  only:
+    - dev

@@ -25,4 +25,4 @@ RUN apk update && apk add ca-certificates && rm -rf /var/cache/apk*
 WORKDIR /usr/local/bin/cdn
 COPY --from=builder /cdn/.env .
 COPY --from=builder /cdn/cdn .
-CMD ["./cdn", "bootstrap"]
+CMD ["./cdn", "app" ,"bootstrap"]
