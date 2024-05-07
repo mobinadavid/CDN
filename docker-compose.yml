@@ -8,7 +8,7 @@ services:
     container_name: app.$APP_HOST
     restart: unless-stopped
     volumes:
-      - ./build/certs/app:/etc/ssl/fund-app/certs:ro
+      - ./build/certs/app:/etc/ssl/certs:ro
     tty: true
     environment:
       TZ: ${APP_TZ}
