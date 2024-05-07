@@ -2,6 +2,7 @@ package api
 
 import (
 	"cdn/src/api/http/middlewares"
+	"cdn/src/api/routes"
 	"cdn/src/config"
 	"fmt"
 	"github.com/gin-gonic/gin"
@@ -18,7 +19,7 @@ var (
 func Init() (err error) {
 
 	g.Go(func() error {
-		return initAdminServer()
+		return initServer()
 	})
 
 	if err = g.Wait(); err != nil {
@@ -50,31 +51,24 @@ func getNewRouter() *gin.Engine {
 	router.Use(middlewares.RequestID)
 
 	if isProduction {
-
 		// Trusted proxies.
 		_ = router.SetTrustedProxies([]string{"https://" + configs.Get("APP_HOST")})
-
 	}
 
 	return router
 }
 
-func initAdminServer() error {
+func initServer() error {
 	router := getNewRouter()
 
 	v1 := router.Group("api/v1")
 	{
-		admins.RegisterAuthenticationRouter(v1)
-		admins.RegisterAccessTokensRouter(v1)
-		admins.RegisterAuthorizationRouter(v1)
-		admins.RegisterUserRouter(v1)
-		admins.RegisterBankAccountRouter(v1)
-		admins.RegisterRayanRoutes(v1)
+		routes.RegisterStorageRoutes(v1)
 	}
 
 	// Run App.
 	if err := router.RunTLS(
-		fmt.Sprintf(":%s", configs.Get("ADMIN_APP_PORT")),
+		fmt.Sprintf(":%s", configs.Get("APP_PORT")),
 		configs.Get("SSL_CERT_PATH"),
 		configs.Get("SSL_KEY_PATH"),
 	); err != nil {

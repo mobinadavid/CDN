@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"cdn/cmd/app"
 	"cdn/src/config"
 	"github.com/spf13/cobra"
 	"log"
