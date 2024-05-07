@@ -70,7 +70,12 @@ func (storageController *StorageController) PutObject(c *gin.Context) {
 			"original_file_name": strings.ToLower(file.Filename),
 			"size":               strconv.FormatInt(file.Size, 10),
 			"file_name":          uuidFileName,
-			"url":                fmt.Sprintf("%s://%s/%s", c.GetHeader("Scheme"), c.Request.Host, "/api/v1/storage/"+uuidFileName),
+			"url": fmt.Sprintf("%s://%s/%s/%s",
+				c.GetHeader("Scheme"),
+				c.Request.Host,
+				"api/v1/storage",
+				uuidFileName,
+			),
 		})
 	}
 
@@ -78,7 +83,7 @@ func (storageController *StorageController) PutObject(c *gin.Context) {
 		SetMessage("Files uploaded successfully").
 		SetStatusCode(http.StatusOK).
 		SetData(map[string]interface{}{
-			"uploads": uploadInfoList,
+			"objects": uploadInfoList,
 		}).Send()
 	return
 }
