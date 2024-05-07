@@ -5,11 +5,13 @@ import (
 	"cdn/src/pkg/minio"
 	"cdn/src/pkg/utils"
 	"context"
+	"fmt"
 	"github.com/gin-gonic/gin"
 	minio2 "github.com/minio/minio-go/v7"
 	"io"
 	"net/http"
 	"strconv"
+	"strings"
 )
 
 var bucketName = "paresh" //todo: hard-coded
@@ -65,10 +67,10 @@ func (storageController *StorageController) PutObject(c *gin.Context) {
 		}
 
 		uploadInfoList = append(uploadInfoList, map[string]string{
-			"original_file_name": file.Filename,
+			"original_file_name": strings.ToLower(file.Filename),
 			"size":               strconv.FormatInt(file.Size, 10),
 			"file_name":          uuidFileName,
-			"url":                c.GetHeader("Scheme") + c.Request.Host + "/api/v1/storage/" + uuidFileName,
+			"url":                fmt.Sprintf("%s://%s/%s", c.GetHeader("Scheme"), c.Request.Host, "/api/v1/storage/"+uuidFileName),
 		})
 	}
 
