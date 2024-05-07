@@ -55,7 +55,6 @@ services:
       - app
     ports:
       - 8250:8250
-      - 8251:8251
     volumes:
       - ./build/certs/nginx:/etc/nginx/certs:ro
       - ./build/docker/nginx:/etc/nginx/templates:ro
