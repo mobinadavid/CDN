@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"errors"
 	"fmt"
 	"github.com/google/uuid"
 	"log"
@@ -18,8 +19,17 @@ func GenerateUUIDFileName(originalFileName string) string {
 func ValidateFiles(files []*multipart.FileHeader) error {
 	allowedExts := []string{".jpg", ".jpeg", ".png", ".pdf", "zip", "rar", "docx", "doc", "csv", "xlsx", "mkv", "mp4"}
 
+	// todo: each ip allowance in 24 hour: 50 files, 50 mb
+
+	if len(files) > 2 {
+		return errors.New("too many files! Maximum 10 files allowed")
+	}
+
 	for _, file := range files {
-		log.Println(file)
+
+		if file.Size > 5*1024*1024 {
+			return errors.New("Maximum 2MB files allowed")
+		}
 
 		ext := strings.ToLower(strings.TrimSpace(filepath.Ext(file.Filename)))
 
