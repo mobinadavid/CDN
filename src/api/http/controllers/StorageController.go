@@ -73,7 +73,7 @@ func (storageController *StorageController) PutObject(c *gin.Context) {
 			"url": fmt.Sprintf("%s://%s/%s/%s",
 				c.GetHeader("Scheme"),
 				c.Request.Host,
-				"api/v1/storage",
+				"app/api/v1/storage",
 				uuidFileName,
 			),
 		})
