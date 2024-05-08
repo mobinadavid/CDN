@@ -15,6 +15,7 @@ release:
     - cp /etc/letsencrypt/live/$APP_HOST/* build/certs/redis
     - cp /etc/letsencrypt/live/$APP_HOST/privkey.pem build/certs/minio/private.key
     - cp /etc/letsencrypt/live/$APP_HOST/fullchain.pem build/certs/minio/public.crt
+    - chmod 755 build/certs/redis/*
     - docker compose down
     - docker compose up -d --build
   only:
