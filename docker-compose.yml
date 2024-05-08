@@ -13,7 +13,9 @@ services:
     environment:
       TZ: ${APP_TZ}
     depends_on:
-      minio:
+#      minio:
+#        condition: service_healthy
+      redis:
         condition: service_healthy
     networks:
       - cdn
@@ -22,18 +24,21 @@ services:
     image: minio/minio:latest
     container_name: minio.$APP_HOST
     restart: unless-stopped
-    command: server /data
+    command: server --certs-dir /etc/minio/certs --console-address :9001 /data
     tty: true
     environment:
+      MINIO_SERVER_URL: "https://$APP_HOST"
+      MINIO_BROWSER_REDIRECT_URL: "https://$APP_HOST/dashboard"
       MINIO_ROOT_USER: ${MINIO_ROOT_USER:-root}
       MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:-myawesomepassword}
       TZ: ${APP_TZ}
-    healthcheck:
-      test: [ "CMD", "mc", "ready", "local" ]
-      interval: 5s
-      timeout: 5s
-      retries: 5
+#    healthcheck:
+#      test: [ "CMD", "mc", "ready", "local" ]
+#      interval: 5s
+#      timeout: 5s
+#      retries: 5
     volumes:
+      - ./build/certs/minio:/etc/minio/certs:ro
       - minio:/data
     networks:
       - cdn
@@ -45,21 +50,45 @@ services:
     environment:
       TZ: ${APP_TZ}
       SERVER_NAME: ${APP_HOST}
-      SERVER_PORT: 8250
-      PROXY_PASS: https://app.${APP_HOST}:${APP_PORT}
+      SERVER_PORT: ${NGINX_LISTENING_PORT}
+      APP_PROXY_PASS: https://app.${APP_HOST}:${APP_PORT}
+      DASHBOARD_PROXY_PASS: https://minio.${APP_HOST}:9001
     tty: true
     depends_on:
       - app
     ports:
-      - 8250:8250
+      - ${NGINX_LISTENING_PORT}:${NGINX_LISTENING_PORT}
     volumes:
       - ./build/certs/nginx:/etc/nginx/certs:ro
       - ./build/docker/nginx:/etc/nginx/templates:ro
     networks:
       - cdn
+  # Redis
+  redis:
+    image: redis:alpine
+    container_name: redis.${APP_HOST}
+    restart: unless-stopped
+    command: redis-server /usr/local/etc/redis/redis.conf --requirepass ${REDIS_PASSWORD}
+    ports:
+      - ${REDIS_PORT:-6379}:6379
+    volumes:
+      - ./build/certs/redis:/etc/redis/certs:ro
+      - ./build/docker/redis/redis.conf:/usr/local/etc/redis/redis.conf:ro
+      - redis-data:/data
+    tty: true
+    environment:
+      TZ: ${APP_TZ}
+    healthcheck:
+      test: [ "CMD-SHELL", "redis-cli -a ${REDIS_PASSWORD} --tls ping" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - cdn
 # Volumes
 volumes:
   minio:
+  redis-data:
 # Networks
 networks:
   cdn:

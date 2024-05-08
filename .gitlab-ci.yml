@@ -9,9 +9,12 @@ release:
     - cp .env.example .env
     - sed -i "s/APP_HOST=.*/APP_HOST=$APP_HOST/g" .env
     - sed -i "s/MINIO_HOST=.*/MINIO_HOST=$MINIO_HOST/g" .env
-    - mkdir -p build/certs/{app,nginx,minio}
-    - cp /etc/letsencrypt/live/cdn.omaxplatform.com/* build/certs/app
-    - cp /etc/letsencrypt/live/cdn.omaxplatform.com/* build/certs/nginx
+    - mkdir -p build/certs/{app,nginx,minio,redis}
+    - cp /etc/letsencrypt/live/$APP_HOST/* build/certs/app
+    - cp /etc/letsencrypt/live/$APP_HOST/* build/certs/nginx
+    - cp /etc/letsencrypt/live/$APP_HOST/* build/certs/redis
+    - cp /etc/letsencrypt/live/$APP_HOST/privkey.pem build/certs/minio/private.key
+    - cp /etc/letsencrypt/live/$APP_HOST/fullchain.pem build/certs/minio/public.crt
     - docker compose down
     - docker compose up -d --build
   only:

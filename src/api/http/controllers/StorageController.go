@@ -2,7 +2,7 @@ package controllers
 
 import (
 	"cdn/src/api/http/response"
-	"cdn/src/pkg/minio"
+	"cdn/src/minio"
 	"cdn/src/pkg/utils"
 	"context"
 	"fmt"

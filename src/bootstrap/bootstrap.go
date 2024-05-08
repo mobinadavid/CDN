@@ -2,7 +2,7 @@ package bootstrap
 
 import (
 	"cdn/src/api"
-	"cdn/src/pkg/minio"
+	"cdn/src/minio"
 	"context"
 	minio2 "github.com/minio/minio-go/v7"
 	"log"

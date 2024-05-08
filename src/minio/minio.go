@@ -28,7 +28,7 @@ func (m *Client) Connect() (err error) {
 
 	m.client, err = minio.New(fmt.Sprintf("%s:9000", configs.Get("MINIO_HOST")), &minio.Options{
 		Creds:  credentials.NewStaticV4(configs.Get("MINIO_ACCESS_KEY"), configs.Get("MINIO_SECRET_KEY"), ""),
-		Secure: false,
+		Secure: true,
 	})
 
 	if err != nil {
