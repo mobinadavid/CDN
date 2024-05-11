@@ -27,7 +27,7 @@ func Api(c *gin.Context) *Builder {
 		c: c,
 		response: Response{
 			RequestUuid: c.GetString("request-uuid"),
-			RequestIp:   c.GetHeader("REMOTE_ADDR"),
+			RequestIp:   c.GetHeader("x-forwarded-for"),
 			// Default values.
 			IsSuccessful: false,
 			StatusCode:   http.StatusBadRequest,

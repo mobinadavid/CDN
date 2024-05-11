@@ -16,7 +16,7 @@ func GenerateUUIDFileName(originalFileName string) string {
 }
 
 func ValidateFiles(files []*multipart.FileHeader) error {
-	allowedExts := []string{".jpg", ".jpeg", ".png", ".pdf", "zip", "rar", "docx", "doc", "csv", "xlsx", "mkv", "mp4"}
+	allowedExts := []string{".jpg", ".jpeg", ".png", ".pdf", ".zip", ".rar", ".docx", ".doc", ".csv", ".xlsx", ".mkv", ".mp4"}
 
 	// todo: each ip allowance in 24 hour: 50 files, 50 mb
 
