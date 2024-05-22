@@ -3,15 +3,11 @@ package bootstrap
 import (
 	"cdn/src/api"
 	"cdn/src/minio"
-	"context"
-	minio2 "github.com/minio/minio-go/v7"
 	"log"
 	"os"
 	"os/signal"
 	"syscall"
 )
-
-var bucketName = "paresh" //todo: hard-coded
 
 func Init() (err error) {
 
@@ -26,18 +22,6 @@ func Init() (err error) {
 		log.Fatalf("Minio Service: Failed to Initialize. %v", err)
 	}
 	log.Println("Minio Service: Initialized Successfully.")
-
-	// Create Bucket todo:Hard-coded
-
-	minioInstance := minio.GetInstance().GetMinio()
-	bucketExists, err := minioInstance.BucketExists(context.Background(), bucketName)
-
-	if !bucketExists {
-		err = minio.GetInstance().GetMinio().MakeBucket(context.Background(), bucketName, minio2.MakeBucketOptions{})
-		if err != nil {
-			log.Fatalf("Minio Service: Failed to Create Bucket. %v", err)
-		}
-	}
 
 	// Initialize API
 	go func() {

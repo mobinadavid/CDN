@@ -14,8 +14,6 @@ import (
 	"strings"
 )
 
-var bucketName = "paresh" //todo: hard-coded
-
 type StorageController struct {
 	minio *minio.Client
 }
@@ -28,14 +26,22 @@ func NewStorageController() *StorageController {
 
 func (storageController *StorageController) PutObject(c *gin.Context) {
 	form, err := c.MultipartForm()
-
 	if err != nil {
 		response.Api(c).SetStatusCode(http.StatusUnprocessableEntity).Send()
 		return
 	}
 
-	err = utils.ValidateFiles(form.File["files[]"])
+	if c.PostForm("bucket") == "" {
+		response.Api(c).SetMessage("bucket is required.").SetStatusCode(http.StatusUnprocessableEntity).Send()
+		return
+	}
 
+	bucketExists, err := storageController.minio.GetMinio().BucketExists(context.Background(), c.PostForm("bucket"))
+	if !bucketExists || err != nil {
+		response.Api(c).SetMessage("The specified bucket does not exist.").SetStatusCode(http.StatusUnprocessableEntity).Send()
+	}
+
+	err = utils.ValidateFiles(form.File["files[]"])
 	if err != nil {
 		response.Api(c).SetMessage(err.Error()).SetStatusCode(http.StatusUnprocessableEntity).Send()
 		return
@@ -53,7 +59,7 @@ func (storageController *StorageController) PutObject(c *gin.Context) {
 
 		uuidFileName := utils.GenerateUUIDFileName(file.Filename)
 
-		_, err = storageController.minio.GetMinio().PutObject(c, bucketName, uuidFileName, src, file.Size, minio2.PutObjectOptions{
+		_, err = storageController.minio.GetMinio().PutObject(c, c.PostForm("bucket"), uuidFileName, src, file.Size, minio2.PutObjectOptions{
 			ContentType: file.Header.Get("Content-Type"),
 		})
 
@@ -70,10 +76,11 @@ func (storageController *StorageController) PutObject(c *gin.Context) {
 			"original_file_name": strings.ToLower(file.Filename),
 			"size":               strconv.FormatInt(file.Size, 10),
 			"file_name":          uuidFileName,
-			"url": fmt.Sprintf("%s://%s/%s/%s",
+			"url": fmt.Sprintf("%s://%s/%s/%s/%s",
 				c.GetHeader("Scheme"),
 				c.Request.Host,
 				"app/api/v1/storage",
+				c.PostForm("bucket"),
 				uuidFileName,
 			),
 		})
@@ -89,9 +96,15 @@ func (storageController *StorageController) PutObject(c *gin.Context) {
 }
 
 func (storageController *StorageController) GetObject(c *gin.Context) {
-	fileName := c.Param("fileName")
-	file, err := storageController.minio.GetMinio().GetObject(context.Background(), bucketName, fileName, minio2.GetObjectOptions{})
+	bucketName := c.Param("bucket")
+	fileName := c.Param("file")
 
+	if bucketName == "" || fileName == "" {
+		response.Api(c).SetMessage("bucket or file is missing.").SetStatusCode(http.StatusUnprocessableEntity).Send()
+		return
+	}
+
+	file, err := storageController.minio.GetMinio().GetObject(context.Background(), bucketName, fileName, minio2.GetObjectOptions{})
 	if err != nil {
 		response.Api(c).SetStatusCode(http.StatusNotFound).Send()
 		return

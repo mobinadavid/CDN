@@ -11,6 +11,6 @@ func RegisterStorageRoutes(router *gin.RouterGroup) {
 	storage := router.Group("storage")
 	{
 		storage.POST("", controller.PutObject)
-		storage.GET(":fileName", controller.GetObject)
+		storage.GET(":bucket/:file", controller.GetObject)
 	}
 }

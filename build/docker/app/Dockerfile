@@ -11,7 +11,7 @@ COPY . /cdn-app
 # Install Dependencies
 RUN --mount=type=cache,target=/go/pkg/mod/cache \
     --mount=type=cache,target=/go-build \
-   go mod download
+    go mod download
 
 # Build the binary
 RUN --mount=type=cache,target=/go/pkg/mod/cache \

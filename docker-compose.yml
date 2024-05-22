@@ -13,8 +13,8 @@ services:
     environment:
       TZ: ${APP_TZ}
     depends_on:
-#      minio:
-#        condition: service_healthy
+      minio:
+        condition: service_healthy
       redis:
         condition: service_healthy
     networks:
@@ -27,16 +27,16 @@ services:
     command: server --certs-dir /etc/minio/certs --console-address :9001 /data
     tty: true
     environment:
-      MINIO_SERVER_URL: "https://$APP_HOST"
+      MINIO_SERVER_URL: "https://$APP_HOST:9000"
       MINIO_BROWSER_REDIRECT_URL: "https://$APP_HOST/dashboard"
       MINIO_ROOT_USER: ${MINIO_ROOT_USER:-root}
       MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:-myawesomepassword}
       TZ: ${APP_TZ}
-#    healthcheck:
-#      test: [ "CMD", "mc", "ready", "local" ]
-#      interval: 5s
-#      timeout: 5s
-#      retries: 5
+    healthcheck:
+      test: ["CMD-SHELL", "mc alias set minio https://$APP_HOST:9000 ${MINIO_ROOT_USER} ${MINIO_ROOT_PASSWORD} && mc admin info minio"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
     volumes:
       - ./build/certs/minio:/etc/minio/certs:ro
       - minio:/data
