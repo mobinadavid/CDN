@@ -33,7 +33,7 @@ services:
       MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:-myawesomepassword}
       TZ: ${APP_TZ}
     healthcheck:
-      test: ["CMD-SHELL", "mc alias set minio https://$APP_HOST:9000 ${MINIO_ROOT_USER} ${MINIO_ROOT_PASSWORD} && mc admin info minio"]
+      test: ["CMD-SHELL", "mc alias set minio https://$MINIO_HOST:9000 ${MINIO_ROOT_USER} ${MINIO_ROOT_PASSWORD} && mc admin info minio"]
       interval: 5s
       timeout: 5s
       retries: 5
