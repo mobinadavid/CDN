@@ -2,81 +2,48 @@ package controllers
 
 import (
 	"cdn/src/api/http/response"
-	"cdn/src/minio"
 	"cdn/src/pkg/utils"
-	"context"
-	"fmt"
+	"cdn/src/service"
 	"github.com/gin-gonic/gin"
-	minio2 "github.com/minio/minio-go/v7"
 	"io"
 	"net/http"
 	"strconv"
-	"strings"
 )
 
-var bucketName = "paresh" //todo: hard-coded
+//var bucketName = "paresh" //todo: hard-coded
 
 type StorageController struct {
-	minio *minio.Client
+	storageService *service.StorageService
 }
 
-func NewStorageController() *StorageController {
+func NewStorageController(storageService *service.StorageService) *StorageController {
 	return &StorageController{
-		minio: minio.GetInstance(),
+		storageService: storageService,
 	}
 }
 
 func (storageController *StorageController) PutObject(c *gin.Context) {
 	form, err := c.MultipartForm()
-
 	if err != nil {
 		response.Api(c).SetStatusCode(http.StatusUnprocessableEntity).Send()
 		return
 	}
 
-	err = utils.ValidateFiles(form.File["files[]"])
-
+	files := form.File["files[]"]
+	err = utils.ValidateFiles(files)
 	if err != nil {
 		response.Api(c).SetMessage(err.Error()).SetStatusCode(http.StatusUnprocessableEntity).Send()
 		return
 	}
 
 	var uploadInfoList []map[string]string
-
-	for _, file := range form.File["files[]"] {
-		src, err := file.Open()
+	for _, file := range files {
+		uploadInfo, err := storageController.storageService.UploadFile(c, file)
 		if err != nil {
 			response.Api(c).SetMessage(err.Error()).SetStatusCode(http.StatusInternalServerError).Send()
 			return
 		}
-		defer src.Close()
-
-		uuidFileName := utils.GenerateUUIDFileName(file.Filename)
-
-		_, err = storageController.minio.GetMinio().PutObject(c, bucketName, uuidFileName, src, file.Size, minio2.PutObjectOptions{
-			ContentType: file.Header.Get("Content-Type"),
-		})
-
-		if err != nil {
-			response.Api(c).
-				SetMessage(err.Error()).
-				SetStatusCode(http.StatusInternalServerError).
-				Send()
-
-			return
-		}
-
-		uploadInfoList = append(uploadInfoList, map[string]string{
-			"original_file_name": strings.ToLower(file.Filename),
-			"size":               strconv.FormatInt(file.Size, 10),
-			"file_name":          uuidFileName,
-			"url": fmt.Sprintf("%s://%s/%s/%s",
-				c.GetHeader("Scheme"),
-				c.Request.Host,
-				"app/api/v1/storage",
-				uuidFileName,
-			),
-		})
+		uploadInfoList = append(uploadInfoList, uploadInfo)
 	}
 
 	response.Api(c).
@@ -85,13 +52,11 @@ func (storageController *StorageController) PutObject(c *gin.Context) {
 		SetData(map[string]interface{}{
 			"objects": uploadInfoList,
 		}).Send()
-	return
 }
 
 func (storageController *StorageController) GetObject(c *gin.Context) {
 	fileName := c.Param("fileName")
-	file, err := storageController.minio.GetMinio().GetObject(context.Background(), bucketName, fileName, minio2.GetObjectOptions{})
-
+	file, err := storageController.storageService.GetObject(fileName)
 	if err != nil {
 		response.Api(c).SetStatusCode(http.StatusNotFound).Send()
 		return
@@ -109,7 +74,6 @@ func (storageController *StorageController) GetObject(c *gin.Context) {
 	c.Header("Content-Length", strconv.FormatInt(stat.Size, 10))
 
 	_, err = io.Copy(c.Writer, file)
-
 	if err != nil {
 		response.Api(c).SetStatusCode(http.StatusInternalServerError).Send()
 		return
