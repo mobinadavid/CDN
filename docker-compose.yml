@@ -26,6 +26,8 @@ services:
     restart: unless-stopped
     command: server --certs-dir /etc/minio/certs --console-address :9001 /data
     tty: true
+    ports:
+      - "9000:9000"
     environment:
       MINIO_SERVER_URL: "https://$APP_HOST"
       MINIO_BROWSER_REDIRECT_URL: "https://$APP_HOST/dashboard"

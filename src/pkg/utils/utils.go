@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"cdn/src/config"
 	"errors"
 	"fmt"
 	"github.com/google/uuid"
@@ -16,7 +17,6 @@ func GenerateUUIDFileName(originalFileName string) string {
 }
 
 func ValidateFiles(files []*multipart.FileHeader) error {
-	allowedExts := []string{".jpg", ".jpeg", ".png", ".pdf", ".zip", ".rar", ".docx", ".doc", ".csv", ".xlsx", ".mkv", ".mp4"}
 
 	// todo: each ip allowance in 24 hour: 50 files, 50 mb
 
@@ -33,6 +33,9 @@ func ValidateFiles(files []*multipart.FileHeader) error {
 		ext := strings.ToLower(strings.TrimSpace(filepath.Ext(file.Filename)))
 
 		// Check if file extension is allowed
+		var configs = config.GetInstance()
+		allowedExtsEnv := configs.Get("ALLOWED_EXTENSIONS")
+		allowedExts := strings.Split(allowedExtsEnv, ",")
 		valid := false
 		for _, allowedExt := range allowedExts {
 			if ext == allowedExt {
