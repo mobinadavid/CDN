@@ -27,13 +27,13 @@ services:
     command: server --certs-dir /etc/minio/certs --console-address :9001 /data
     tty: true
     environment:
-      MINIO_SERVER_URL: "https://$MINIO_HOST:9000"
+      MINIO_SERVER_URL: "https://minio.$APP_HOST:9000"
       MINIO_BROWSER_REDIRECT_URL: "https://$APP_HOST/dashboard"
       MINIO_ROOT_USER: ${MINIO_ROOT_USER:-root}
       MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:-myawesomepassword}
       TZ: ${APP_TZ}
     healthcheck:
-      test: ["CMD-SHELL", "mc alias set minio https://$MINIO_HOST:9000 ${MINIO_ROOT_USER} ${MINIO_ROOT_PASSWORD} && mc admin info minio"]
+      test: ["CMD-SHELL", "mc alias set minio https://minio.$APP_HOST:9000 ${MINIO_ROOT_USER} ${MINIO_ROOT_PASSWORD} && mc admin info minio"]
       interval: 5s
       timeout: 5s
       retries: 5
