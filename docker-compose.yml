@@ -27,7 +27,7 @@ services:
     command: server --certs-dir /etc/minio/certs --console-address :9001 /data
     tty: true
     environment:
-      MINIO_SERVER_URL: "https://$APP_HOST:9000"
+      MINIO_SERVER_URL: "https://$MINIO_HOST:9000"
       MINIO_BROWSER_REDIRECT_URL: "https://$APP_HOST/dashboard"
       MINIO_ROOT_USER: ${MINIO_ROOT_USER:-root}
       MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:-myawesomepassword}
