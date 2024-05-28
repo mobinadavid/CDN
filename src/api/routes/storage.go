@@ -2,11 +2,14 @@ package routes
 
 import (
 	"cdn/src/api/http/controllers"
+	"cdn/src/minio"
+	"cdn/src/service"
 	"github.com/gin-gonic/gin"
 )
 
 func RegisterStorageRoutes(router *gin.RouterGroup) {
-	controller := controllers.NewStorageController()
+	service := service.NewStorageService(minio.GetInstance().GetMinio())
+	controller := controllers.NewStorageController(service)
 
 	storage := router.Group("storage")
 	{
