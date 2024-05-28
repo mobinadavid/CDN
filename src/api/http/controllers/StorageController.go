@@ -5,6 +5,7 @@ import (
 	"cdn/src/pkg/utils"
 	"cdn/src/service"
 	"context"
+	"fmt"
 	"github.com/gin-gonic/gin"
 	minio2 "github.com/minio/minio-go/v7"
 	"io"
@@ -94,4 +95,22 @@ func (storageController *StorageController) GetObject(c *gin.Context) {
 		response.Api(c).SetStatusCode(http.StatusInternalServerError).Send()
 		return
 	}
+}
+func (storageController *StorageController) MakeBucket(c *gin.Context) {
+	bucketName := c.PostForm("bucketName")
+	//region is hardCoded
+	//us-east-1
+	region := "us-east-1"
+	err := storageController.storageService.MakeBucket(context.Background(), bucketName, minio2.MakeBucketOptions{Region: region, ObjectLocking: true})
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	response.Api(c).
+		SetMessage("Bucket is successfully created").
+		SetStatusCode(http.StatusOK).
+		SetData(map[string]interface{}{
+			"name":     bucketName,
+			"location": region,
+		}).Send()
 }

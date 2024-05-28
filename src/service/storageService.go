@@ -61,3 +61,7 @@ func (storageService *StorageService) UploadFiles(ctx context.Context, bucket st
 func (storageService *StorageService) GetObject(ctx context.Context, bucket, fileName string, options minio.GetObjectOptions) (*minio.Object, error) {
 	return storageService.MinioClient.GetObject(ctx, bucket, fileName, options)
 }
+
+func (storageService *StorageService) MakeBucket(ctx context.Context, name string, options minio.MakeBucketOptions) interface{} {
+	return storageService.MinioClient.MakeBucket(ctx, name, options)
+}
