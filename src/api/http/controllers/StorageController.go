@@ -136,16 +136,18 @@ func (storageController *StorageController) RemoveBucket(c *gin.Context) {
 		response.Api(c).SetMessage("The specified bucket does not exist.").SetStatusCode(http.StatusUnprocessableEntity).Send()
 		return
 	}
+	storageController.RemoveObjects(c)
 	err = storageController.storageService.RemoveBucket(context.Background(), bucketName)
 	if err != nil {
 		response.Api(c).SetMessage("failed to remove bucket.").SetStatusCode(http.StatusInternalServerError).Send()
+		fmt.Println(err)
 		return
 	}
 	response.Api(c).
 		SetMessage("Bucket removed successfully").
 		SetStatusCode(http.StatusOK).
 		SetData(map[string]interface{}{
-			"name": bucketName,
+			"bucketName": bucketName,
 		}).Send()
 
 }
