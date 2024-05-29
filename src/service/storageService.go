@@ -62,6 +62,23 @@ func (storageService *StorageService) GetObject(ctx context.Context, bucket, fil
 	return storageService.MinioClient.GetObject(ctx, bucket, fileName, options)
 }
 
-func (storageService *StorageService) MakeBucket(ctx context.Context, name string, options minio.MakeBucketOptions) interface{} {
+func (storageService *StorageService) MakeBucket(ctx context.Context, name string, options minio.MakeBucketOptions) error {
 	return storageService.MinioClient.MakeBucket(ctx, name, options)
+}
+func (storageService *StorageService) RemoveBucket(ctx context.Context, name string) error {
+	return storageService.MinioClient.RemoveBucket(ctx, name)
+}
+
+func (storageService *StorageService) ListObjects(ctx context.Context, bucketName string, options minio.ListObjectsOptions) ([]minio.ObjectInfo, error) {
+	var objects []minio.ObjectInfo
+	objectCh := storageService.MinioClient.ListObjects(ctx, bucketName, options)
+	for object := range objectCh {
+		if object.Err != nil {
+			return nil, fmt.Errorf("error occurred while listing objects: %w", object.Err)
+
+		}
+		objects = append(objects, object)
+	}
+
+	return objects, nil
 }
