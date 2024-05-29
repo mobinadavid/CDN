@@ -82,3 +82,8 @@ func (storageService *StorageService) ListObjects(ctx context.Context, bucketNam
 
 	return objects, nil
 }
+func (storageService *StorageService) RemoveObjects(ctx context.Context, bucketName, objectName string, options minio.RemoveObjectOptions) error {
+	err := storageService.MinioClient.RemoveObject(ctx, bucketName, objectName, options)
+	return err
+
+}

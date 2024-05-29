@@ -17,6 +17,7 @@ func RegisterStorageRoutes(router *gin.RouterGroup) {
 		storage.GET(":bucket/:file", controller.GetObject)
 		storage.POST(":bucketName/:region", controller.MakeBucket)
 		storage.GET(":bucket", controller.ListObject)
+		storage.DELETE(":bucketName/", controller.RemoveObjects)
 		storage.DELETE(":bucketName", controller.RemoveBucket)
 
 	}

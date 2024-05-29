@@ -181,3 +181,45 @@ func (storageController *StorageController) ListObject(c *gin.Context) {
 		}).Send()
 
 }
+func (storageController *StorageController) RemoveObjects(c *gin.Context) {
+	bucketName := c.Param("bucketName")
+	exists, err := storageController.storageService.BucketExists(context.Background(), bucketName)
+	if err != nil {
+		response.Api(c).SetMessage("failed to check if bucket exists.").SetStatusCode(http.StatusUnprocessableEntity).Send()
+		return
+	}
+	if !exists {
+		response.Api(c).SetMessage("The specified bucket does not exist.").SetStatusCode(http.StatusUnprocessableEntity).Send()
+		return
+	}
+	objects, err := storageController.storageService.ListObjects(context.Background(), bucketName, minio2.ListObjectsOptions{
+		Recursive: true,
+	})
+
+	// Collect object names
+	objectList := make([]string, 0, len(objects))
+	for _, object := range objects {
+		objectList = append(objectList, object.Key)
+	}
+
+	// Delete all objects
+
+	for _, objectName := range objectList {
+		errCh := storageController.storageService.RemoveObjects(context.Background(), bucketName, objectName, minio2.RemoveObjectOptions{})
+		{
+			if errCh != nil {
+				response.Api(c).SetMessage("failed to remove objects.").SetStatusCode(http.StatusInternalServerError).Send()
+				return
+			}
+
+		}
+
+	}
+	response.Api(c).
+		SetMessage("all removed successfully").
+		SetStatusCode(http.StatusOK).
+		SetData(map[string]interface{}{
+			"object's name:": objectList,
+		}).Send()
+
+}
