@@ -15,6 +15,6 @@ func RegisterStorageRoutes(router *gin.RouterGroup) {
 	{
 		storage.POST("", controller.PutObject)
 		storage.GET(":bucket/:file", controller.GetObject)
-		storage.POST(":bucketName", controller.MakeBucket)
+		storage.POST(":bucketName/:region", controller.MakeBucket)
 	}
 }

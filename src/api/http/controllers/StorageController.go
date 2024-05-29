@@ -5,7 +5,6 @@ import (
 	"cdn/src/pkg/utils"
 	"cdn/src/service"
 	"context"
-	"fmt"
 	"github.com/gin-gonic/gin"
 	minio2 "github.com/minio/minio-go/v7"
 	"io"
@@ -97,17 +96,24 @@ func (storageController *StorageController) GetObject(c *gin.Context) {
 	}
 }
 func (storageController *StorageController) MakeBucket(c *gin.Context) {
-	bucketName := c.PostForm("bucketName")
+	bucketName := c.Param("bucketName")
 	//region is hardCoded
 	//us-east-1
-	region := "us-east-1"
+	region := c.Param("region")
+
+	if bucketName == "" || region == "" {
+		response.Api(c).SetMessage("bucketName or region is missing.").SetStatusCode(http.StatusUnprocessableEntity).Send()
+		return
+	}
+
 	err := storageController.storageService.MakeBucket(context.Background(), bucketName, minio2.MakeBucketOptions{Region: region, ObjectLocking: true})
 	if err != nil {
-		fmt.Println(err)
+		response.Api(c).SetMessage("failed to create bucket.").SetStatusCode(http.StatusInternalServerError).Send()
+
 		return
 	}
 	response.Api(c).
-		SetMessage("Bucket is successfully created").
+		SetMessage("Bucket created successfully").
 		SetStatusCode(http.StatusOK).
 		SetData(map[string]interface{}{
 			"name":     bucketName,
