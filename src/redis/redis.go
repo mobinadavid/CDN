@@ -56,3 +56,15 @@ func (r *Redis) Close() (err error) {
 func (r *Redis) GetClient() *redis.Client {
 	return client
 }
+
+//func Init() error {
+//	configs := config.GetInstance()
+//	redis := Redis{
+//		Host:     configs.Get("REDIS_HOST"),
+//		Port:     configs.Get("REDIS_PORT"),
+//		Password: configs.Get("REDIS_PASSWORD"),
+//		Database: 0,
+//	}
+//	err := redis.Connect()
+//	return err
+//}

@@ -36,7 +36,11 @@ func (storageController *StorageController) PutObject(c *gin.Context) {
 	}
 
 	exists, err := storageController.storageService.BucketExists(context.Background(), bucket)
-	if !exists || err != nil {
+	if err != nil {
+		response.Api(c).SetMessage("failed to check if bucket exists.").SetStatusCode(http.StatusUnprocessableEntity).Send()
+		return
+	}
+	if !exists {
 		response.Api(c).SetMessage("The specified bucket does not exist.").SetStatusCode(http.StatusUnprocessableEntity).Send()
 		return
 	}

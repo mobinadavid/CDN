@@ -22,7 +22,12 @@ func Init() (err error) {
 		log.Fatalf("Minio Service: Failed to Initialize. %v", err)
 	}
 	log.Println("Minio Service: Initialized Successfully.")
-
+	//Initialize Redis
+	//err = drivers.Init()
+	//if err != nil {
+	//	log.Fatalln("Failed to connect to Redis:", err)
+	//}
+	//log.Println("Redis Service: Initialized Successfully.")
 	// Initialize API
 	go func() {
 		err = api.Init()
