@@ -2,6 +2,7 @@ package service
 
 import (
 	"cdn/src/pkg/utils"
+	drivers "cdn/src/redis"
 	"context"
 	"fmt"
 	"mime/multipart"
@@ -13,6 +14,7 @@ import (
 
 type StorageService struct {
 	MinioClient *minio.Client
+	Redis       *drivers.Redis
 }
 
 func NewStorageService(minioClient *minio.Client) *StorageService {

@@ -3,11 +3,13 @@ package controllers
 import (
 	"cdn/src/api/http/response"
 	"cdn/src/pkg/utils"
+	drivers "cdn/src/redis"
 	"cdn/src/service"
 	"context"
 	"fmt"
 	"github.com/gin-gonic/gin"
 	minio2 "github.com/minio/minio-go/v7"
+
 	"io"
 	"net/http"
 	"strconv"
@@ -49,7 +51,22 @@ func (storageController *StorageController) PutObject(c *gin.Context) {
 		response.Api(c).SetMessage(err.Error()).SetStatusCode(http.StatusUnprocessableEntity).Send()
 		return
 	}
+	ip := c.ClientIP()
+	//check rate limit
+	var redisInstance *drivers.Redis
+	redisInstance = &drivers.Redis{}
 
+	allowed, err := redisInstance.CheckRateLimit(ip)
+
+	if err != nil {
+		response.Api(c).SetMessage("Failed to check rate limit").SetStatusCode(http.StatusInternalServerError).Send()
+		return
+	}
+
+	if !allowed {
+		response.Api(c).SetMessage("Rate limit exceeded").SetStatusCode(http.StatusTooManyRequests).Send()
+		return
+	}
 	uploadInfoList, err := storageController.storageService.UploadFiles(context.WithValue(c.Request.Context(), "Scheme", c.GetHeader("Scheme")), bucket, form.File["files[]"])
 	if err != nil {
 		response.Api(c).

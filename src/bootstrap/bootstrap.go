@@ -3,6 +3,7 @@ package bootstrap
 import (
 	"cdn/src/api"
 	"cdn/src/minio"
+	drivers "cdn/src/redis"
 	"log"
 	"os"
 	"os/signal"
@@ -15,19 +16,17 @@ func Init() (err error) {
 		log.Println("Goodbye!")
 		os.Exit(0)
 	}()
-
-	// Initialize Minio
 	err = minio.Init()
 	if err != nil {
 		log.Fatalf("Minio Service: Failed to Initialize. %v", err)
 	}
 	log.Println("Minio Service: Initialized Successfully.")
 	//Initialize Redis
-	//err = drivers.Init()
-	//if err != nil {
-	//	log.Fatalln("Failed to connect to Redis:", err)
-	//}
-	//log.Println("Redis Service: Initialized Successfully.")
+	err = drivers.Init()
+	if err != nil {
+		log.Fatalln("Failed to connect to Redis:", err)
+	}
+	log.Println("Redis Service: Initialized Successfully.")
 	// Initialize API
 	go func() {
 		err = api.Init()
