@@ -53,6 +53,7 @@ func (storageController *StorageController) PutObject(c *gin.Context) {
 	}
 	ip := c.ClientIP()
 	//check rate limit
+
 	var redisInstance *drivers.Redis
 	redisInstance = &drivers.Redis{}
 
