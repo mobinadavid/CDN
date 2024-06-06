@@ -12,16 +12,18 @@ func RegisterStorageRoutes(router *gin.RouterGroup) {
 	bucketService := service.NewBucketService(minio.GetInstance().GetMinio())
 	objectService := service.NewObjectService(minio.GetInstance().GetMinio())
 	redisService := service.NewRedisService(redis.GetInstance().GetClient())
-	controller := controllers.NewStorageController(bucketService, objectService, redisService)
+	objectController := controllers.NewObjectController(bucketService, objectService, redisService)
+	bucketController := controllers.NewBucketController(bucketService, objectService, redisService)
 
 	storage := router.Group("storage")
 	{
-		storage.POST("", controller.PutObject)
-		storage.GET("buckets/:bucket/:file", controller.GetObject)
-		storage.POST("buckets/:bucketName", controller.MakeBucket)
-		storage.GET("buckets/:bucketName", controller.ListObject)
-		storage.DELETE("buckets/:bucketName/", controller.RemoveObjects)
-		storage.DELETE("buckets/:bucketName", controller.RemoveBucket)
+		storage.POST("", objectController.PutObject)
+		storage.GET("buckets/:bucketName/files/:file", objectController.GetObject)
+		storage.DELETE("buckets/:bucketName/objects", objectController.RemoveObjects)
 
+		// Bucket related routes
+		storage.POST("buckets/:bucketName", bucketController.MakeBucket)
+		storage.GET("buckets/:bucketName/objects", bucketController.ListObject)
+		storage.DELETE("buckets/:bucketName", bucketController.RemoveBucket)
 	}
 }
