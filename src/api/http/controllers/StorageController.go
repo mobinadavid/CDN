@@ -3,7 +3,6 @@ package controllers
 import (
 	"cdn/src/api/http/response"
 	"cdn/src/pkg/utils"
-	drivers "cdn/src/redis"
 	"cdn/src/service"
 	"context"
 	"fmt"
@@ -17,10 +16,13 @@ import (
 
 type StorageController struct {
 	storageService *service.StorageService
+	redisService   *service.RedisService
 }
 
-func NewStorageController(storageService *service.StorageService) *StorageController {
-	return &StorageController{storageService: storageService}
+func NewStorageController(storageService *service.StorageService, redisService *service.RedisService) *StorageController {
+	return &StorageController{storageService: storageService,
+		redisService: redisService,
+	}
 }
 
 func (storageController *StorageController) PutObject(c *gin.Context) {
@@ -54,18 +56,13 @@ func (storageController *StorageController) PutObject(c *gin.Context) {
 	ip := c.ClientIP()
 	//check rate limit
 
-	var redisInstance *drivers.Redis
-	redisInstance = &drivers.Redis{}
-
-	allowed, err := redisInstance.CheckRateLimit(ip)
-
+	allowed, err := storageController.redisService.CheckRateLimit(ip)
 	if err != nil {
 		response.Api(c).SetMessage("Failed to check rate limit").SetStatusCode(http.StatusInternalServerError).Send()
 		return
 	}
-
 	if !allowed {
-		response.Api(c).SetMessage("Rate limit exceeded").SetStatusCode(http.StatusTooManyRequests).Send()
+		response.Api(c).SetMessage("You can't put more than 10 Objects in one hour ").SetStatusCode(http.StatusTooManyRequests).Send()
 		return
 	}
 	uploadInfoList, err := storageController.storageService.UploadFiles(context.WithValue(c.Request.Context(), "Scheme", c.GetHeader("Scheme")), bucket, form.File["files[]"])
@@ -120,11 +117,8 @@ func (storageController *StorageController) GetObject(c *gin.Context) {
 }
 func (storageController *StorageController) MakeBucket(c *gin.Context) {
 	bucketName := c.Param("bucketName")
-	//region is hardCoded
-	//us-east-1
-	region := c.Param("region")
 
-	if bucketName == "" || region == "" {
+	if bucketName == "" {
 		response.Api(c).SetMessage("bucketName or region is missing.").SetStatusCode(http.StatusUnprocessableEntity).Send()
 		return
 	}
@@ -133,7 +127,7 @@ func (storageController *StorageController) MakeBucket(c *gin.Context) {
 		response.Api(c).SetMessage("The specified bucket already exists.").SetStatusCode(http.StatusNotFound).Send()
 		return
 	}
-	err = storageController.storageService.MakeBucket(context.Background(), bucketName, minio2.MakeBucketOptions{Region: region})
+	err = storageController.storageService.MakeBucket(context.Background(), bucketName, minio2.MakeBucketOptions{})
 	if err != nil {
 		response.Api(c).SetMessage("failed to create bucket.").SetStatusCode(http.StatusInternalServerError).Send()
 
@@ -143,8 +137,7 @@ func (storageController *StorageController) MakeBucket(c *gin.Context) {
 		SetMessage("Bucket created successfully").
 		SetStatusCode(http.StatusOK).
 		SetData(map[string]interface{}{
-			"name":     bucketName,
-			"location": region,
+			"bucketName": bucketName,
 		}).Send()
 }
 func (storageController *StorageController) RemoveBucket(c *gin.Context) {
@@ -158,33 +151,17 @@ func (storageController *StorageController) RemoveBucket(c *gin.Context) {
 		response.Api(c).SetMessage("The specified bucket does not exist.").SetStatusCode(http.StatusUnprocessableEntity).Send()
 		return
 	}
-	objects, err := storageController.storageService.ListObjects(context.Background(), bucketName, minio2.ListObjectsOptions{
-		Recursive: true,
-	})
-	// to remove ,  bucket should be empty
-	// Collect object names
-	objectList := make([]string, 0, len(objects))
-	for _, object := range objects {
-		objectList = append(objectList, object.Key)
+	// check if bucket is empty or not
+
+	objects, err := storageController.storageService.ListObjects(context.Background(), bucketName, minio2.ListObjectsOptions{})
+	if len(objects) != 0 {
+		response.Api(c).SetMessage("The bucket is not empty.").SetStatusCode(http.StatusUnprocessableEntity).Send()
+		return
 	}
 
-	// Delete all objects
-
-	for _, objectName := range objectList {
-		errCh := storageController.storageService.RemoveObjects(context.Background(), bucketName, objectName, minio2.RemoveObjectOptions{})
-		{
-			if errCh != nil {
-				response.Api(c).SetMessage("failed to remove objects.").SetStatusCode(http.StatusInternalServerError).Send()
-				return
-			}
-
-		}
-
-	}
 	err = storageController.storageService.RemoveBucket(context.Background(), bucketName)
 	if err != nil {
 		response.Api(c).SetMessage("failed to remove bucket.").SetStatusCode(http.StatusInternalServerError).Send()
-		fmt.Println(err)
 		return
 	}
 	response.Api(c).
@@ -196,7 +173,7 @@ func (storageController *StorageController) RemoveBucket(c *gin.Context) {
 
 }
 func (storageController *StorageController) ListObject(c *gin.Context) {
-	bucketName := c.Param("bucket")
+	bucketName := c.Param("bucketName")
 	exists, err := storageController.storageService.BucketExists(context.Background(), bucketName)
 	if err != nil {
 		response.Api(c).SetMessage("failed to check if bucket exists.").SetStatusCode(http.StatusUnprocessableEntity).Send()
