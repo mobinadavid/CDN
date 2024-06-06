@@ -15,13 +15,15 @@ import (
 )
 
 type StorageController struct {
-	storageService *service.StorageService
-	redisService   *service.RedisService
+	bucketService *service.BucketService
+	objectService *service.ObjectService
+	redisService  *service.RedisService
 }
 
-func NewStorageController(storageService *service.StorageService, redisService *service.RedisService) *StorageController {
-	return &StorageController{storageService: storageService,
-		redisService: redisService,
+func NewStorageController(bucketService *service.BucketService, objectService *service.ObjectService, redisService *service.RedisService) *StorageController {
+	return &StorageController{bucketService: bucketService,
+		objectService: objectService,
+		redisService:  redisService,
 	}
 }
 
@@ -39,7 +41,7 @@ func (storageController *StorageController) PutObject(c *gin.Context) {
 
 	}
 
-	exists, err := storageController.storageService.BucketExists(context.Background(), bucket)
+	exists, err := storageController.bucketService.BucketExists(context.Background(), bucket)
 	if err != nil {
 		response.Api(c).SetMessage("failed to check if bucket exists.").SetStatusCode(http.StatusUnprocessableEntity).Send()
 		return
@@ -65,7 +67,7 @@ func (storageController *StorageController) PutObject(c *gin.Context) {
 		response.Api(c).SetMessage("You can't put more than 10 Objects in one hour ").SetStatusCode(http.StatusTooManyRequests).Send()
 		return
 	}
-	uploadInfoList, err := storageController.storageService.UploadFiles(context.WithValue(c.Request.Context(), "Scheme", c.GetHeader("Scheme")), bucket, form.File["files[]"])
+	uploadInfoList, err := storageController.objectService.PutObject(context.WithValue(c.Request.Context(), "Scheme", c.GetHeader("Scheme")), bucket, form.File["files[]"])
 	if err != nil {
 		response.Api(c).
 			SetMessage(err.Error()).
@@ -91,7 +93,7 @@ func (storageController *StorageController) GetObject(c *gin.Context) {
 		return
 	}
 
-	file, err := storageController.storageService.GetObject(context.Background(), bucketName, fileName, minio2.GetObjectOptions{})
+	file, err := storageController.objectService.GetObject(context.Background(), bucketName, fileName, minio2.GetObjectOptions{})
 	if err != nil {
 		response.Api(c).SetStatusCode(http.StatusNotFound).Send()
 		return
@@ -122,12 +124,12 @@ func (storageController *StorageController) MakeBucket(c *gin.Context) {
 		response.Api(c).SetMessage("bucketName or region is missing.").SetStatusCode(http.StatusUnprocessableEntity).Send()
 		return
 	}
-	exists, err := storageController.storageService.BucketExists(context.Background(), bucketName)
+	exists, err := storageController.bucketService.BucketExists(context.Background(), bucketName)
 	if exists || err != nil {
 		response.Api(c).SetMessage("The specified bucket already exists.").SetStatusCode(http.StatusNotFound).Send()
 		return
 	}
-	err = storageController.storageService.MakeBucket(context.Background(), bucketName, minio2.MakeBucketOptions{})
+	err = storageController.bucketService.MakeBucket(context.Background(), bucketName, minio2.MakeBucketOptions{})
 	if err != nil {
 		response.Api(c).SetMessage("failed to create bucket.").SetStatusCode(http.StatusInternalServerError).Send()
 
@@ -142,7 +144,7 @@ func (storageController *StorageController) MakeBucket(c *gin.Context) {
 }
 func (storageController *StorageController) RemoveBucket(c *gin.Context) {
 	bucketName := c.Param("bucketName")
-	exists, err := storageController.storageService.BucketExists(context.Background(), bucketName)
+	exists, err := storageController.bucketService.BucketExists(context.Background(), bucketName)
 	if err != nil {
 		response.Api(c).SetMessage("failed to check if bucket exists.").SetStatusCode(http.StatusUnprocessableEntity).Send()
 		return
@@ -153,13 +155,13 @@ func (storageController *StorageController) RemoveBucket(c *gin.Context) {
 	}
 	// check if bucket is empty or not
 
-	objects, err := storageController.storageService.ListObjects(context.Background(), bucketName, minio2.ListObjectsOptions{})
+	objects, err := storageController.bucketService.ListObjects(context.Background(), bucketName, minio2.ListObjectsOptions{})
 	if len(objects) != 0 {
 		response.Api(c).SetMessage("The bucket is not empty.").SetStatusCode(http.StatusUnprocessableEntity).Send()
 		return
 	}
 
-	err = storageController.storageService.RemoveBucket(context.Background(), bucketName)
+	err = storageController.bucketService.RemoveBucket(context.Background(), bucketName)
 	if err != nil {
 		response.Api(c).SetMessage("failed to remove bucket.").SetStatusCode(http.StatusInternalServerError).Send()
 		return
@@ -174,7 +176,7 @@ func (storageController *StorageController) RemoveBucket(c *gin.Context) {
 }
 func (storageController *StorageController) ListObject(c *gin.Context) {
 	bucketName := c.Param("bucketName")
-	exists, err := storageController.storageService.BucketExists(context.Background(), bucketName)
+	exists, err := storageController.bucketService.BucketExists(context.Background(), bucketName)
 	if err != nil {
 		response.Api(c).SetMessage("failed to check if bucket exists.").SetStatusCode(http.StatusUnprocessableEntity).Send()
 		return
@@ -183,7 +185,7 @@ func (storageController *StorageController) ListObject(c *gin.Context) {
 		response.Api(c).SetMessage("The specified bucket does not exist.").SetStatusCode(http.StatusUnprocessableEntity).Send()
 		return
 	}
-	objects, err := storageController.storageService.ListObjects(c, bucketName, minio2.ListObjectsOptions{})
+	objects, err := storageController.bucketService.ListObjects(c, bucketName, minio2.ListObjectsOptions{})
 	if err != nil {
 		response.Api(c).SetMessage("failed to list objects.").SetStatusCode(http.StatusInternalServerError).Send()
 		fmt.Println(err)
@@ -207,7 +209,7 @@ func (storageController *StorageController) ListObject(c *gin.Context) {
 }
 func (storageController *StorageController) RemoveObjects(c *gin.Context) {
 	bucketName := c.Param("bucketName")
-	exists, err := storageController.storageService.BucketExists(context.Background(), bucketName)
+	exists, err := storageController.bucketService.BucketExists(context.Background(), bucketName)
 	if err != nil {
 		response.Api(c).SetMessage("failed to check if bucket exists.").SetStatusCode(http.StatusUnprocessableEntity).Send()
 		return
@@ -216,7 +218,7 @@ func (storageController *StorageController) RemoveObjects(c *gin.Context) {
 		response.Api(c).SetMessage("The specified bucket does not exist.").SetStatusCode(http.StatusUnprocessableEntity).Send()
 		return
 	}
-	objects, err := storageController.storageService.ListObjects(context.Background(), bucketName, minio2.ListObjectsOptions{
+	objects, err := storageController.bucketService.ListObjects(context.Background(), bucketName, minio2.ListObjectsOptions{
 		Recursive: true,
 	})
 
@@ -229,7 +231,7 @@ func (storageController *StorageController) RemoveObjects(c *gin.Context) {
 	// Delete all objects
 
 	for _, objectName := range objectList {
-		errCh := storageController.storageService.RemoveObjects(context.Background(), bucketName, objectName, minio2.RemoveObjectOptions{})
+		errCh := storageController.objectService.RemoveObjects(context.Background(), bucketName, objectName, minio2.RemoveObjectOptions{})
 		{
 			if errCh != nil {
 				response.Api(c).SetMessage("failed to remove objects.").SetStatusCode(http.StatusInternalServerError).Send()

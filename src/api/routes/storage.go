@@ -9,14 +9,15 @@ import (
 )
 
 func RegisterStorageRoutes(router *gin.RouterGroup) {
-	storageService := service.NewStorageService(minio.GetInstance().GetMinio())
+	bucketService := service.NewBucketService(minio.GetInstance().GetMinio())
+	objectService := service.NewObjectService(minio.GetInstance().GetMinio())
 	redisService := service.NewRedisService(redis.GetInstance().GetClient())
-	controller := controllers.NewStorageController(storageService, redisService)
+	controller := controllers.NewStorageController(bucketService, objectService, redisService)
 
 	storage := router.Group("storage")
 	{
 		storage.POST("", controller.PutObject)
-		storage.GET(":bucket/:file", controller.GetObject)
+		storage.GET("buckets/:bucket/:file", controller.GetObject)
 		storage.POST("buckets/:bucketName", controller.MakeBucket)
 		storage.GET("buckets/:bucketName", controller.ListObject)
 		storage.DELETE("buckets/:bucketName/", controller.RemoveObjects)
