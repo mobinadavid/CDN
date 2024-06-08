@@ -68,34 +68,6 @@ func GetInstance() *Client {
 	return instance
 }
 
-//	func (r *Redis) CheckRateLimit(ip string) (bool, error) {
-//		// Get the current count of objects put by the IP
-//		count, err := r.GetClient().Get(context.Background(), ip).Int()
-//		if err != nil && err != redis.Nil {
-//			return false, err
-//		}
-//
-//		// If count doesn't exist, initialize it to 0
-//		if err == redis.Nil {
-//			count = 0
-//		}
-//
-//		// If count exceeds 10, reject the request
-//		if count >= 10 {
-//			return false, nil
-//		}
-//
-//		// Increment the count
-//		err = r.GetClient().Incr(context.Background(), ip).Err()
-//		if err != nil {
-//			return false, err
-//		}
-//
-//		// Set the expiration time for the key to one hour if it doesn't exist
-//		r.GetClient().Expire(context.Background(), ip, time.Hour)
-//
-//		return true, nil
-//	}
 func Init() error {
 	return GetInstance().Connect()
 }
