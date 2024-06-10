@@ -63,7 +63,8 @@ func initServer() error {
 
 	v1 := router.Group("api/v1")
 	{
-		routes.RegisterStorageRoutes(v1)
+		routes.ObjectRoutes(v1)
+		routes.BucketRoutes(v1)
 	}
 
 	// Run App.

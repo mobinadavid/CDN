@@ -1,4 +1,4 @@
-package service
+package minio
 
 import (
 	"cdn/src/pkg/utils"

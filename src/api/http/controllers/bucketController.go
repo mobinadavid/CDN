@@ -2,7 +2,7 @@ package controllers
 
 import (
 	"cdn/src/api/http/response"
-	"cdn/src/service"
+	"cdn/src/service/minio"
 	"context"
 	"fmt"
 	"github.com/gin-gonic/gin"
@@ -11,15 +11,13 @@ import (
 )
 
 type BucketController struct {
-	bucketService *service.BucketService
-	objectService *service.ObjectService
-	redisService  *service.RedisService
+	bucketService *minio.BucketService
+	objectService *minio.ObjectService
 }
 
-func NewBucketController(bucketService *service.BucketService, objectService *service.ObjectService, redisService *service.RedisService) *BucketController {
+func NewBucketController(bucketService *minio.BucketService, objectService *minio.ObjectService) *BucketController {
 	return &BucketController{bucketService: bucketService,
 		objectService: objectService,
-		redisService:  redisService,
 	}
 }
 func (bucketController *BucketController) MakeBucket(c *gin.Context) {

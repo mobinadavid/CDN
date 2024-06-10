@@ -3,7 +3,7 @@ package controllers
 import (
 	"cdn/src/api/http/response"
 	"cdn/src/pkg/utils"
-	"cdn/src/service"
+	"cdn/src/service/minio"
 	"context"
 	"github.com/gin-gonic/gin"
 	minio2 "github.com/minio/minio-go/v7"
@@ -12,19 +12,17 @@ import (
 	"strconv"
 )
 
-type objectController struct {
-	bucketService *service.BucketService
-	objectService *service.ObjectService
-	redisService  *service.RedisService
+type ObjectController struct {
+	bucketService *minio.BucketService
+	objectService *minio.ObjectService
 }
 
-func NewObjectController(bucketService *service.BucketService, objectService *service.ObjectService, redisService *service.RedisService) *objectController {
-	return &objectController{bucketService: bucketService,
+func NewObjectController(bucketService *minio.BucketService, objectService *minio.ObjectService) *ObjectController {
+	return &ObjectController{bucketService: bucketService,
 		objectService: objectService,
-		redisService:  redisService,
 	}
 }
-func (objectController *objectController) PutObject(c *gin.Context) {
+func (objectController *ObjectController) PutObject(c *gin.Context) {
 	form, err := c.MultipartForm()
 	if err != nil {
 		response.Api(c).SetStatusCode(http.StatusUnprocessableEntity).Send()
@@ -52,18 +50,7 @@ func (objectController *objectController) PutObject(c *gin.Context) {
 		response.Api(c).SetMessage(err.Error()).SetStatusCode(http.StatusUnprocessableEntity).Send()
 		return
 	}
-	ip := c.ClientIP()
-	//check rate limit
 
-	allowed, err := objectController.redisService.CheckRateLimit(ip)
-	if err != nil {
-		response.Api(c).SetMessage("Failed to check rate limit").SetStatusCode(http.StatusInternalServerError).Send()
-		return
-	}
-	if !allowed {
-		response.Api(c).SetMessage("You can't put more than 10 Objects in one hour ").SetStatusCode(http.StatusTooManyRequests).Send()
-		return
-	}
 	uploadInfoList, err := objectController.objectService.PutObject(context.WithValue(c.Request.Context(), "Scheme", c.GetHeader("Scheme")), bucket, form.File["files[]"])
 	if err != nil {
 		response.Api(c).
@@ -81,7 +68,7 @@ func (objectController *objectController) PutObject(c *gin.Context) {
 		}).Send()
 }
 
-func (objectController *objectController) GetObject(c *gin.Context) {
+func (objectController *ObjectController) GetObject(c *gin.Context) {
 	bucketName := c.Param("bucketName")
 	fileName := c.Param("file")
 
@@ -115,7 +102,7 @@ func (objectController *objectController) GetObject(c *gin.Context) {
 	}
 }
 
-func (objectController *objectController) RemoveObjects(c *gin.Context) {
+func (objectController *ObjectController) RemoveObjects(c *gin.Context) {
 	bucketName := c.Param("bucketName")
 	exists, err := objectController.bucketService.BucketExists(context.Background(), bucketName)
 	if err != nil {
