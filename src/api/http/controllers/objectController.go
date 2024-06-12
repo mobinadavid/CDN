@@ -30,6 +30,7 @@ func (objectController *ObjectController) PutObject(c *gin.Context) {
 	}
 
 	bucket := c.PostForm("bucket")
+	folder := c.PostForm("folder")
 	if bucket == "" {
 		response.Api(c).SetMessage("bucket is required.").SetStatusCode(http.StatusUnprocessableEntity).Send()
 		return
@@ -51,7 +52,7 @@ func (objectController *ObjectController) PutObject(c *gin.Context) {
 		return
 	}
 
-	uploadInfoList, err := objectController.objectService.PutObject(context.WithValue(c.Request.Context(), "Scheme", c.GetHeader("Scheme")), bucket, form.File["files[]"])
+	uploadInfoList, err := objectController.objectService.PutObject(context.WithValue(c.Request.Context(), "Scheme", c.GetHeader("Scheme")), bucket, form.File["files[]"], folder)
 	if err != nil {
 		response.Api(c).
 			SetMessage(err.Error()).
@@ -71,13 +72,14 @@ func (objectController *ObjectController) PutObject(c *gin.Context) {
 func (objectController *ObjectController) GetObject(c *gin.Context) {
 	bucketName := c.Param("bucketName")
 	fileName := c.Param("file")
-
+	folder := c.Query("folder")
+	objectName := folder + "/" + fileName
 	if bucketName == "" || fileName == "" {
 		response.Api(c).SetMessage("bucket or file is missing.").SetStatusCode(http.StatusUnprocessableEntity).Send()
 		return
 	}
 
-	file, err := objectController.objectService.GetObject(context.Background(), bucketName, fileName, minio2.GetObjectOptions{})
+	file, err := objectController.objectService.GetObject(context.Background(), bucketName, objectName, minio2.GetObjectOptions{})
 	if err != nil {
 		response.Api(c).SetStatusCode(http.StatusNotFound).Send()
 		return

@@ -9,7 +9,7 @@ import (
 
 func RateLimit(redisService *redis.RedisService) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		ip := c.ClientIP()                     // Get the client's IP address
+		ip := c.GetHeader("x-forwarded-for")   // Get the client's IP address
 		userAgent := c.GetHeader("User-Agent") // Get the User-Agent header
 
 		// Check rate limit

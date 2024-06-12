@@ -17,7 +17,7 @@ type ObjectService struct {
 func NewObjectService(minioClient *minio.Client) *ObjectService {
 	return &ObjectService{MinioClient: minioClient}
 }
-func (objectService *ObjectService) PutObject(ctx context.Context, bucket string, files []*multipart.FileHeader) ([]map[string]string, error) {
+func (objectService *ObjectService) PutObject(ctx context.Context, bucket string, files []*multipart.FileHeader, folder string) ([]map[string]string, error) {
 	var uploadInfoList []map[string]string
 
 	for _, file := range files {
@@ -26,8 +26,9 @@ func (objectService *ObjectService) PutObject(ctx context.Context, bucket string
 			return nil, err
 		}
 		defer src.Close()
+		fileName := utils.GenerateUUIDFileName(file.Filename)
 
-		uuidFileName := utils.GenerateUUIDFileName(file.Filename)
+		uuidFileName := folder + "/" + fileName
 
 		_, err = objectService.MinioClient.PutObject(ctx, bucket, uuidFileName, src, file.Size, minio.PutObjectOptions{
 			ContentType: file.Header.Get("Content-Type"),
@@ -39,7 +40,8 @@ func (objectService *ObjectService) PutObject(ctx context.Context, bucket string
 		uploadInfoList = append(uploadInfoList, map[string]string{
 			"original_file_name": strings.ToLower(file.Filename),
 			"size":               strconv.FormatInt(file.Size, 10),
-			"file_name":          uuidFileName,
+			"file_name":          fileName,
+			"folder":             folder,
 			"url": fmt.Sprintf("%objectService://%objectService/%objectService/%objectService/%objectService",
 				ctx.Value("Scheme"),
 				ctx.Value("Host"),
