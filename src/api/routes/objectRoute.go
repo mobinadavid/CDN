@@ -19,8 +19,9 @@ func ObjectRoutes(router *gin.RouterGroup) {
 	storage := router.Group("storage")
 	{
 		storage.POST("", middlewares.RateLimit(redisService), objectController.PutObject)
-		storage.GET("buckets/:bucketName/files/:file", objectController.GetObject)
-		storage.DELETE("buckets/:bucketName/objects", objectController.RemoveObjects)
+		storage.GET("buckets/:bucket/files/:file", objectController.GetObject)
+		storage.DELETE("buckets/:bucket/objects", objectController.RemoveObjects)
+		storage.GET("buckets/:bucket/tags/:tag", objectController.GetByTag)
 
 	}
 }

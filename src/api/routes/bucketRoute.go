@@ -15,8 +15,8 @@ func BucketRoutes(router *gin.RouterGroup) {
 	storage := router.Group("storage")
 	{
 		// Bucket related routes
-		storage.POST("buckets/:bucketName", bucketController.MakeBucket)
-		storage.GET("buckets/:bucketName/objects", bucketController.ListObject)
-		storage.DELETE("buckets/:bucketName", bucketController.RemoveBucket)
+		storage.POST("buckets/:bucket", bucketController.MakeBucket)
+		storage.GET("buckets/:bucket/objects", bucketController.ListObject)
+		storage.DELETE("buckets/:bucket", bucketController.RemoveBucket)
 	}
 }

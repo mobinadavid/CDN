@@ -17,13 +17,17 @@ func NewRedisService(redisClient *redis.Client) *RedisService {
 }
 
 func (redisService *RedisService) GenerateCompositeKey(ip, userAgent string) string {
+
 	compositeKey := fmt.Sprintf("%s:%s", ip, userAgent)
 	hasher := sha1.New()
 	hasher.Write([]byte(compositeKey))
+
 	return fmt.Sprintf("%x", hasher.Sum(nil))
+
 }
 
 func (redisService *RedisService) CheckAndIncrementRateLimit(ip, userAgent string) (bool, error) {
+
 	ctx := context.Background()
 	compositeKey := redisService.GenerateCompositeKey(ip, userAgent)
 
@@ -39,7 +43,7 @@ func (redisService *RedisService) CheckAndIncrementRateLimit(ip, userAgent strin
 	}
 
 	// If count exceeds the limit (10 in this case), reject the request
-	if count >= 10 {
+	if count >= 100 {
 		return false, nil
 	}
 
