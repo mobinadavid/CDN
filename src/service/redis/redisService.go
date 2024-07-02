@@ -13,6 +13,7 @@ type RedisService struct {
 }
 
 func NewRedisService(redisClient *redis.Client) *RedisService {
+
 	return &RedisService{RedisClient: redisClient}
 }
 

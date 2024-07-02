@@ -62,6 +62,9 @@ func (objectController *ObjectController) PutObject(c *gin.Context) {
 
 	tags := make(map[string]string)
 	var uploadInfoList []map[string]string
+	ctx := context.Background()
+	ctx = context.WithValue(ctx, "Host", c.Request.Host)
+	ctx = context.WithValue(ctx, "Scheme", c.GetHeader("Scheme"))
 
 	switch {
 	case tagsStr != "":
@@ -72,9 +75,9 @@ func (objectController *ObjectController) PutObject(c *gin.Context) {
 				tags[pair[0]] = pair[1]
 			}
 		}
-		uploadInfoList, err = objectController.objectService.PutObject(context.WithValue(context.Background(), "Scheme", c.GetHeader("Scheme")), c.Request.Host, bucket, form.File["files[]"], folder, tags)
+		uploadInfoList, err = objectController.objectService.PutObject(ctx, bucket, form.File["files[]"], folder, tags)
 	default:
-		uploadInfoList, err = objectController.objectService.PutObject(context.WithValue(context.Background(), "Scheme", c.GetHeader("Scheme")), c.Request.Host, bucket, form.File["files[]"], folder)
+		uploadInfoList, err = objectController.objectService.PutObject(ctx, bucket, form.File["files[]"], folder)
 	}
 
 	if err != nil {
@@ -231,7 +234,7 @@ func (objectController *ObjectController) RemoveObject(c *gin.Context) {
 		objectList = append(objectList, objectName)
 	}
 
-	exist := objectController.bucketService.ObjectExists(existingObjectList, objectList)
+	exist := objectController.objectService.ObjectExists(existingObjectList, objectList)
 	if exist == false {
 		response.Api(c).SetMessage("failed to find objects.").SetStatusCode(http.StatusInternalServerError).Send()
 		return
@@ -262,12 +265,16 @@ func (objectController *ObjectController) GetTag(c *gin.Context) {
 	bucket := c.Param("bucket")
 	tagsStr := c.Param("tag")
 
+	ctx := context.Background()
+	ctx = context.WithValue(ctx, "Host", c.Request.Host)
+	ctx = context.WithValue(ctx, "Scheme", c.GetHeader("Scheme"))
+
 	if bucket == "" {
 		response.Api(c).SetMessage("bucket is missing.").SetStatusCode(http.StatusUnprocessableEntity).Send()
 		return
 	}
 
-	urls, err := objectController.objectService.GetTag(context.WithValue(context.Background(), "Scheme", c.GetHeader("Scheme")), c.Request.Host, bucket, tagsStr)
+	urls, err := objectController.objectService.GetTag(ctx, bucket, tagsStr)
 
 	if err != nil {
 		response.Api(c).SetMessage("Failed to get objects by tags.").SetStatusCode(http.StatusInternalServerError).Send()

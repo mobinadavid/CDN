@@ -18,6 +18,10 @@ func (bucketService *BucketService) MakeBucket(ctx context.Context, name string,
 	return bucketService.MinioClient.MakeBucket(ctx, name, options)
 }
 
+func (bucketService *BucketService) ListBucket(ctx context.Context) ([]minio.BucketInfo, error) {
+	return bucketService.MinioClient.ListBuckets(ctx)
+}
+
 func (bucketService *BucketService) RemoveBucket(ctx context.Context, name string) error {
 	return bucketService.MinioClient.RemoveBucket(ctx, name)
 }

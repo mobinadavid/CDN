@@ -19,10 +19,10 @@ func NewObjectService(minioClient *minio.Client) *ObjectService {
 	return &ObjectService{MinioClient: minioClient}
 }
 
-func (objectService *ObjectService) PutObject(ctx context.Context, host string, bucket string, files []*multipart.FileHeader, folder string, tags ...map[string]string) ([]map[string]string, error) {
+func (objectService *ObjectService) PutObject(ctx context.Context, bucket string, files []*multipart.FileHeader, folder string, tags ...map[string]string) ([]map[string]string, error) {
 
 	var uploadInfoList []map[string]string
-
+	var uuidFileName string
 	for _, file := range files {
 
 		src, err := file.Open()
@@ -32,7 +32,12 @@ func (objectService *ObjectService) PutObject(ctx context.Context, host string, 
 		defer src.Close()
 
 		fileName := utils.GenerateUUIDFileName(file.Filename)
-		uuidFileName := folder + "/" + fileName
+		if folder != "" {
+			uuidFileName = folder + "/" + fileName
+
+		} else {
+			uuidFileName = fileName
+		}
 
 		options := minio.PutObjectOptions{
 			ContentType: file.Header.Get("Content-Type"),
@@ -54,7 +59,7 @@ func (objectService *ObjectService) PutObject(ctx context.Context, host string, 
 			"folder":             folder,
 			"url": fmt.Sprintf("%s://%s/%s/%s/%s/%s/%s",
 				ctx.Value("Scheme"),
-				host,
+				ctx.Value("Host"),
 				"app/api/v1/storage",
 				"buckets",
 				bucket,
@@ -79,7 +84,7 @@ func (objectService *ObjectService) RemoveObjects(ctx context.Context, bucketNam
 
 }
 
-func (objectService *ObjectService) GetTag(ctx context.Context, host string, bucket string, tagStr string) ([]map[string]string, error) {
+func (objectService *ObjectService) GetTag(ctx context.Context, bucket string, tagStr string) ([]map[string]string, error) {
 
 	var uploadInfoList []map[string]string
 	var existingTag = make(map[string]string)
@@ -120,11 +125,12 @@ func (objectService *ObjectService) GetTag(ctx context.Context, host string, buc
 				}
 			}
 		}
+
 		if tagsMatch(existingTag, tags) {
 			uploadInfoList = append(uploadInfoList, map[string]string{
 				"url": fmt.Sprintf("%s://%s/%s/%s/%s/%s/%s",
 					ctx.Value("Scheme"),
-					host,
+					ctx.Value("Host"),
 					"app/api/v1/storage",
 					"buckets",
 					bucket,
@@ -147,5 +153,21 @@ func tagsMatch(objectTags map[string]string, queryTags map[string]string) bool {
 		}
 	}
 
+	return true
+}
+
+func (objectService *ObjectService) ObjectExists(existingObject []string, objectList []string) bool {
+	for _, object := range objectList {
+		found := false
+		for _, existingObjects := range existingObject {
+			if object == existingObjects {
+				found = true
+				break
+			}
+		}
+		if !found {
+			return false
+		}
+	}
 	return true
 }

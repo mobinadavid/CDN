@@ -78,6 +78,7 @@ func (bucketController *BucketController) RemoveBucket(c *gin.Context) {
 		response.Api(c).SetMessage("failed to remove bucket.").SetStatusCode(http.StatusInternalServerError).Send()
 		return
 	}
+
 	response.Api(c).
 		SetMessage("Bucket is removed successfully").
 		SetStatusCode(http.StatusOK).
@@ -86,6 +87,7 @@ func (bucketController *BucketController) RemoveBucket(c *gin.Context) {
 		}).Send()
 
 }
+
 func (bucketController *BucketController) ListObject(c *gin.Context) {
 
 	bucketName := c.Param("bucket")
@@ -101,7 +103,9 @@ func (bucketController *BucketController) ListObject(c *gin.Context) {
 		return
 	}
 
-	objects, err := bucketController.bucketService.ListObjects(c, bucketName, minio2.ListObjectsOptions{})
+	objects, err := bucketController.bucketService.ListObjects(c, bucketName, minio2.ListObjectsOptions{
+		Recursive: true,
+	})
 
 	if err != nil {
 		response.Api(c).SetMessage("failed to list objects.").SetStatusCode(http.StatusInternalServerError).Send()
@@ -122,6 +126,24 @@ func (bucketController *BucketController) ListObject(c *gin.Context) {
 		SetData(map[string]interface{}{
 			"number of objects:": len(objectList),
 			"objects:":           objectList,
+		}).Send()
+
+}
+
+func (bucketController *BucketController) ListBucket(c *gin.Context) {
+
+	buckets, err := bucketController.bucketService.ListBucket(context.Background())
+
+	if err != nil {
+		response.Api(c).SetMessage("failed to list buckets.").SetStatusCode(http.StatusInternalServerError).Send()
+		return
+	}
+
+	response.Api(c).
+		SetMessage("Bucket created successfully").
+		SetStatusCode(http.StatusOK).
+		SetData(map[string]interface{}{
+			"buckets:": buckets,
 		}).Send()
 
 }
