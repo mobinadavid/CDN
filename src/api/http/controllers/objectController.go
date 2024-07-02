@@ -72,10 +72,9 @@ func (objectController *ObjectController) PutObject(c *gin.Context) {
 				tags[pair[0]] = pair[1]
 			}
 		}
-		uploadInfoList, err = objectController.objectService.PutObject(context.WithValue(c.Request.Context(), "Scheme", c.GetHeader("Scheme")), bucket, form.File["files[]"], folder, tags)
-
+		uploadInfoList, err = objectController.objectService.PutObject(context.WithValue(context.Background(), "Scheme", c.GetHeader("Scheme")), c.Request.Host, bucket, form.File["files[]"], folder, tags)
 	default:
-		uploadInfoList, err = objectController.objectService.PutObject(context.WithValue(c.Request.Context(), "Scheme", c.GetHeader("Scheme")), bucket, form.File["files[]"], folder)
+		uploadInfoList, err = objectController.objectService.PutObject(context.WithValue(context.Background(), "Scheme", c.GetHeader("Scheme")), c.Request.Host, bucket, form.File["files[]"], folder)
 	}
 
 	if err != nil {
@@ -101,16 +100,16 @@ func (objectController *ObjectController) GetObject(c *gin.Context) {
 	bucketName := c.Param("bucket")
 	fileName := c.Param("file")
 
+	if bucketName == "" || fileName == "" {
+		response.Api(c).SetMessage("bucket or file is missing.").SetStatusCode(http.StatusUnprocessableEntity).Send()
+		return
+	}
+
 	if strings.Contains(fileName, "_") {
 		folders := strings.Split(fileName, "_")
 		objectName = folders[0] + "/" + folders[1]
 	} else {
 		objectName = fileName
-	}
-
-	if bucketName == "" || fileName == "" {
-		response.Api(c).SetMessage("bucket or file is missing.").SetStatusCode(http.StatusUnprocessableEntity).Send()
-		return
 	}
 
 	file, err := objectController.objectService.GetObject(context.Background(), bucketName, objectName, minio2.GetObjectOptions{})
@@ -137,13 +136,19 @@ func (objectController *ObjectController) GetObject(c *gin.Context) {
 		response.Api(c).SetStatusCode(http.StatusInternalServerError).Send()
 		return
 	}
+
 }
 
 func (objectController *ObjectController) RemoveObjects(c *gin.Context) {
 
-	bucketName := c.Param("bucket")
+	bucket := c.Param("bucket")
 
-	exists, err := objectController.bucketService.BucketExists(context.Background(), bucketName)
+	if bucket == "" {
+		response.Api(c).SetMessage("bucket is missing.").SetStatusCode(http.StatusUnprocessableEntity).Send()
+		return
+	}
+
+	exists, err := objectController.bucketService.BucketExists(context.Background(), bucket)
 	if err != nil {
 		response.Api(c).SetMessage("failed to check if bucket exists.").SetStatusCode(http.StatusUnprocessableEntity).Send()
 		return
@@ -154,7 +159,7 @@ func (objectController *ObjectController) RemoveObjects(c *gin.Context) {
 		return
 	}
 
-	objects, err := objectController.bucketService.ListObjects(context.Background(), bucketName, minio2.ListObjectsOptions{
+	objects, err := objectController.bucketService.ListObjects(context.Background(), bucket, minio2.ListObjectsOptions{
 		Recursive: true,
 	})
 
@@ -166,7 +171,7 @@ func (objectController *ObjectController) RemoveObjects(c *gin.Context) {
 
 	// Delete all objects
 	for _, objectName := range objectList {
-		errCh := objectController.objectService.RemoveObjects(context.Background(), bucketName, objectName, minio2.RemoveObjectOptions{})
+		errCh := objectController.objectService.RemoveObjects(context.Background(), bucket, objectName, minio2.RemoveObjectOptions{})
 		{
 			if errCh != nil {
 				response.Api(c).SetMessage("failed to remove objects.").SetStatusCode(http.StatusInternalServerError).Send()
@@ -185,28 +190,84 @@ func (objectController *ObjectController) RemoveObjects(c *gin.Context) {
 
 }
 
-func (objectController *ObjectController) GetByTag(c *gin.Context) {
+func (objectController *ObjectController) RemoveObject(c *gin.Context) {
 
-	bucketName := c.Param("bucket")
+	bucket := c.Param("bucket")
+	fileName := c.Param("file")
+
+	if bucket == "" || fileName == "" {
+		response.Api(c).SetMessage("bucket or file is missing.").SetStatusCode(http.StatusUnprocessableEntity).Send()
+		return
+	}
+
+	exists, err := objectController.bucketService.BucketExists(context.Background(), bucket)
+	if err != nil {
+		response.Api(c).SetMessage("failed to check if bucket exists.").SetStatusCode(http.StatusUnprocessableEntity).Send()
+		return
+	}
+
+	if !exists {
+		response.Api(c).SetMessage("The specified bucket does not exist.").SetStatusCode(http.StatusUnprocessableEntity).Send()
+		return
+	}
+
+	objects, err := objectController.bucketService.ListObjects(context.Background(), bucket, minio2.ListObjectsOptions{
+		Recursive: true,
+	})
+
+	// Collect object names
+	existingObjectList := make([]string, 0, len(objects))
+	for _, object := range objects {
+		existingObjectList = append(existingObjectList, object.Key)
+	}
+
+	objectList := make([]string, 0)
+
+	for _, objectName := range strings.Split(fileName, ",") {
+		if strings.Contains(objectName, "_") {
+			splitString := strings.Split(objectName, "_")
+			objectName = splitString[0] + "/" + splitString[1]
+		}
+		objectList = append(objectList, objectName)
+	}
+
+	exist := objectController.bucketService.ObjectExists(existingObjectList, objectList)
+	if exist == false {
+		response.Api(c).SetMessage("failed to find objects.").SetStatusCode(http.StatusInternalServerError).Send()
+		return
+	}
+
+	// Delete the objects
+	for _, objectName := range objectList {
+
+		errCh := objectController.objectService.RemoveObjects(context.Background(), bucket, objectName, minio2.RemoveObjectOptions{})
+
+		if errCh != nil {
+			response.Api(c).SetMessage("failed to remove objects.").SetStatusCode(http.StatusInternalServerError).Send()
+			return
+		}
+
+	}
+
+	response.Api(c).
+		SetMessage("removed successfully").
+		SetStatusCode(http.StatusOK).
+		SetData(map[string]interface{}{
+			"object's name:": objectList,
+		}).Send()
+
+}
+func (objectController *ObjectController) GetTag(c *gin.Context) {
+
+	bucket := c.Param("bucket")
 	tagsStr := c.Param("tag")
 
-	if bucketName == "" {
+	if bucket == "" {
 		response.Api(c).SetMessage("bucket is missing.").SetStatusCode(http.StatusUnprocessableEntity).Send()
 		return
 	}
 
-	tags := make(map[string]string)
-	if tagsStr != "" {
-		tagPairs := strings.Split(tagsStr, ",")
-		for _, tagPair := range tagPairs {
-			pair := strings.Split(tagPair, "=")
-			if len(pair) == 2 {
-				tags[pair[0]] = pair[1]
-			}
-		}
-	}
-
-	objects, err := objectController.objectService.GetObjectsByTags(context.Background(), bucketName, tags)
+	urls, err := objectController.objectService.GetTag(context.WithValue(context.Background(), "Scheme", c.GetHeader("Scheme")), c.Request.Host, bucket, tagsStr)
 
 	if err != nil {
 		response.Api(c).SetMessage("Failed to get objects by tags.").SetStatusCode(http.StatusInternalServerError).Send()
@@ -217,7 +278,7 @@ func (objectController *ObjectController) GetByTag(c *gin.Context) {
 		SetMessage("urls retrieved successfully").
 		SetStatusCode(http.StatusOK).
 		SetData(map[string]interface{}{
-			"url of objects": objects,
+			"urls :": urls,
 		}).Send()
 
 }

@@ -18,5 +18,7 @@ func BucketRoutes(router *gin.RouterGroup) {
 		storage.POST("buckets/:bucket", bucketController.MakeBucket)
 		storage.GET("buckets/:bucket/objects", bucketController.ListObject)
 		storage.DELETE("buckets/:bucket", bucketController.RemoveBucket)
+		storage.GET("", bucketController.ListBucket)
+
 	}
 }

@@ -19,7 +19,7 @@ func NewObjectService(minioClient *minio.Client) *ObjectService {
 	return &ObjectService{MinioClient: minioClient}
 }
 
-func (objectService *ObjectService) PutObject(ctx context.Context, bucket string, files []*multipart.FileHeader, folder string, tags ...map[string]string) ([]map[string]string, error) {
+func (objectService *ObjectService) PutObject(ctx context.Context, host string, bucket string, files []*multipart.FileHeader, folder string, tags ...map[string]string) ([]map[string]string, error) {
 
 	var uploadInfoList []map[string]string
 
@@ -52,11 +52,13 @@ func (objectService *ObjectService) PutObject(ctx context.Context, bucket string
 			"size":               strconv.FormatInt(file.Size, 10),
 			"file_name":          fileName,
 			"folder":             folder,
-			"url": fmt.Sprintf("%objectService://%objectService/%objectService/%objectService/%objectService",
+			"url": fmt.Sprintf("%s://%s/%s/%s/%s/%s/%s",
 				ctx.Value("Scheme"),
-				ctx.Value("Host"),
+				host,
 				"app/api/v1/storage",
+				"buckets",
 				bucket,
+				"files",
 				uuidFileName,
 			),
 		})
@@ -77,20 +79,34 @@ func (objectService *ObjectService) RemoveObjects(ctx context.Context, bucketNam
 
 }
 
-func (objectService *ObjectService) GetObjectsByTags(ctx context.Context, bucketName string, tags map[string]string) ([]map[string]string, error) {
+func (objectService *ObjectService) GetTag(ctx context.Context, host string, bucket string, tagStr string) ([]map[string]string, error) {
 
 	var uploadInfoList []map[string]string
-	existingTag := make(map[string]string)
+	var existingTag = make(map[string]string)
+
+	tags := make(map[string]string)
+	if tagStr != "" {
+		tagPairs := strings.Split(tagStr, ",")
+		for _, tagPair := range tagPairs {
+			pair := strings.Split(tagPair, "=")
+			if len(pair) == 2 {
+				tags[pair[0]] = pair[1]
+			}
+		}
+	}
 
 	// List objects in the bucket
-	objectCh := objectService.MinioClient.ListObjects(ctx, bucketName, minio.ListObjectsOptions{})
+	objectCh := objectService.MinioClient.ListObjects(ctx, bucket, minio.ListObjectsOptions{
+		Recursive: true,
+	})
 
 	for object := range objectCh {
+
 		if object.Err != nil {
 			return nil, object.Err
 		}
 
-		tag, err := objectService.MinioClient.GetObjectTagging(ctx, bucketName, object.Key, minio.GetObjectTaggingOptions{})
+		tag, err := objectService.MinioClient.GetObjectTagging(ctx, bucket, object.Key, minio.GetObjectTaggingOptions{})
 		if err != nil {
 			return nil, err
 		}
@@ -104,14 +120,15 @@ func (objectService *ObjectService) GetObjectsByTags(ctx context.Context, bucket
 				}
 			}
 		}
-
 		if tagsMatch(existingTag, tags) {
 			uploadInfoList = append(uploadInfoList, map[string]string{
-				"url": fmt.Sprintf("%objectService://%objectService/%objectService/%objectService/%objectService",
+				"url": fmt.Sprintf("%s://%s/%s/%s/%s/%s/%s",
 					ctx.Value("Scheme"),
-					ctx.Value("Host"),
+					host,
 					"app/api/v1/storage",
-					bucketName,
+					"buckets",
+					bucket,
+					"files",
 					object.Key,
 				),
 			})
@@ -119,6 +136,7 @@ func (objectService *ObjectService) GetObjectsByTags(ctx context.Context, bucket
 	}
 
 	return uploadInfoList, nil
+
 }
 
 func tagsMatch(objectTags map[string]string, queryTags map[string]string) bool {
@@ -128,5 +146,6 @@ func tagsMatch(objectTags map[string]string, queryTags map[string]string) bool {
 			return false
 		}
 	}
+
 	return true
 }
