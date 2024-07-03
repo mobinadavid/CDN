@@ -23,6 +23,7 @@ func ObjectRoutes(router *gin.RouterGroup) {
 		storage.DELETE("buckets/:bucket/objects", objectController.RemoveObjects)
 		storage.DELETE("buckets/:bucket/files/:file", objectController.RemoveObject)
 		storage.GET("buckets/:bucket/tags/:tag", objectController.GetTag)
+		storage.DELETE("buckets/:bucket/objects/:object", objectController.RemoveTag)
 
 	}
 }
