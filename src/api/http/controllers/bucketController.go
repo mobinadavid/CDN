@@ -4,7 +4,6 @@ import (
 	"cdn/src/api/http/response"
 	"cdn/src/service/minio"
 	"context"
-	"fmt"
 	"github.com/gin-gonic/gin"
 	minio2 "github.com/minio/minio-go/v7"
 	"net/http"
@@ -35,8 +34,8 @@ func (bucketController *BucketController) MakeBucket(c *gin.Context) {
 		response.Api(c).SetMessage("The specified bucket already exists.").SetStatusCode(http.StatusNotFound).Send()
 		return
 	}
-	err = bucketController.bucketService.MakeBucket(context.Background(), bucketName, minio2.MakeBucketOptions{})
 
+	err = bucketController.bucketService.MakeBucket(context.Background(), bucketName, minio2.MakeBucketOptions{})
 	if err != nil {
 		response.Api(c).SetMessage("failed to create bucket.").SetStatusCode(http.StatusInternalServerError).Send()
 
@@ -109,7 +108,6 @@ func (bucketController *BucketController) ListObject(c *gin.Context) {
 
 	if err != nil {
 		response.Api(c).SetMessage("failed to list objects.").SetStatusCode(http.StatusInternalServerError).Send()
-		fmt.Println(err)
 		return
 	}
 
@@ -133,7 +131,6 @@ func (bucketController *BucketController) ListObject(c *gin.Context) {
 func (bucketController *BucketController) ListBucket(c *gin.Context) {
 
 	buckets, err := bucketController.bucketService.ListBucket(context.Background())
-
 	if err != nil {
 		response.Api(c).SetMessage("failed to list buckets.").SetStatusCode(http.StatusInternalServerError).Send()
 		return

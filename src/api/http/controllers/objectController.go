@@ -62,6 +62,7 @@ func (objectController *ObjectController) PutObject(c *gin.Context) {
 
 	tags := make(map[string]string)
 	var uploadInfoList []map[string]string
+
 	ctx := context.Background()
 	ctx = context.WithValue(ctx, "Host", c.Request.Host)
 	ctx = context.WithValue(ctx, "Scheme", c.GetHeader("Scheme"))
@@ -75,6 +76,7 @@ func (objectController *ObjectController) PutObject(c *gin.Context) {
 				tags[pair[0]] = pair[1]
 			}
 		}
+
 		uploadInfoList, err = objectController.objectService.PutObject(ctx, bucket, form.File["files[]"], folder, tags)
 	default:
 		uploadInfoList, err = objectController.objectService.PutObject(ctx, bucket, form.File["files[]"], folder)
@@ -100,6 +102,7 @@ func (objectController *ObjectController) PutObject(c *gin.Context) {
 func (objectController *ObjectController) GetObject(c *gin.Context) {
 
 	var objectName string
+
 	bucketName := c.Param("bucket")
 	fileName := c.Param("file")
 
@@ -156,7 +159,6 @@ func (objectController *ObjectController) RemoveObjects(c *gin.Context) {
 		response.Api(c).SetMessage("failed to check if bucket exists.").SetStatusCode(http.StatusUnprocessableEntity).Send()
 		return
 	}
-
 	if !exists {
 		response.Api(c).SetMessage("The specified bucket does not exist.").SetStatusCode(http.StatusUnprocessableEntity).Send()
 		return
@@ -175,15 +177,12 @@ func (objectController *ObjectController) RemoveObjects(c *gin.Context) {
 	// Delete all objects
 	for _, objectName := range objectList {
 		errCh := objectController.objectService.RemoveObjects(context.Background(), bucket, objectName, minio2.RemoveObjectOptions{})
-		{
-			if errCh != nil {
-				response.Api(c).SetMessage("failed to remove objects.").SetStatusCode(http.StatusInternalServerError).Send()
-				return
-			}
-
+		if errCh != nil {
+			response.Api(c).SetMessage("failed to remove objects.").SetStatusCode(http.StatusInternalServerError).Send()
+			return
 		}
-
 	}
+
 	response.Api(c).
 		SetMessage("all removed successfully").
 		SetStatusCode(http.StatusOK).
@@ -208,7 +207,6 @@ func (objectController *ObjectController) RemoveObject(c *gin.Context) {
 		response.Api(c).SetMessage("failed to check if bucket exists.").SetStatusCode(http.StatusUnprocessableEntity).Send()
 		return
 	}
-
 	if !exists {
 		response.Api(c).SetMessage("The specified bucket does not exist.").SetStatusCode(http.StatusUnprocessableEntity).Send()
 		return
@@ -275,7 +273,6 @@ func (objectController *ObjectController) GetTag(c *gin.Context) {
 	}
 
 	urls, err := objectController.objectService.GetTag(ctx, bucket, tagsStr)
-
 	if err != nil {
 		response.Api(c).SetMessage("Failed to get objects by tags.").SetStatusCode(http.StatusInternalServerError).Send()
 		return

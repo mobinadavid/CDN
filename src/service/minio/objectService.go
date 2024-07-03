@@ -15,7 +15,6 @@ type ObjectService struct {
 }
 
 func NewObjectService(minioClient *minio.Client) *ObjectService {
-
 	return &ObjectService{MinioClient: minioClient}
 }
 
@@ -23,15 +22,17 @@ func (objectService *ObjectService) PutObject(ctx context.Context, bucket string
 
 	var uploadInfoList []map[string]string
 	var uuidFileName string
-	for _, file := range files {
 
+	for _, file := range files {
 		src, err := file.Open()
 		if err != nil {
 			return nil, err
 		}
+
 		defer src.Close()
 
 		fileName := utils.GenerateUUIDFileName(file.Filename)
+
 		if folder != "" {
 			uuidFileName = folder + "/" + fileName
 
@@ -73,15 +74,12 @@ func (objectService *ObjectService) PutObject(ctx context.Context, bucket string
 }
 
 func (objectService *ObjectService) GetObject(ctx context.Context, bucket, fileName string, options minio.GetObjectOptions) (*minio.Object, error) {
-
 	return objectService.MinioClient.GetObject(ctx, bucket, fileName, options)
 }
 
 func (objectService *ObjectService) RemoveObjects(ctx context.Context, bucketName, objectName string, options minio.RemoveObjectOptions) error {
-
 	err := objectService.MinioClient.RemoveObject(ctx, bucketName, objectName, options)
 	return err
-
 }
 
 func (objectService *ObjectService) GetTag(ctx context.Context, bucket string, tagStr string) ([]map[string]string, error) {
@@ -106,7 +104,6 @@ func (objectService *ObjectService) GetTag(ctx context.Context, bucket string, t
 	})
 
 	for object := range objectCh {
-
 		if object.Err != nil {
 			return nil, object.Err
 		}

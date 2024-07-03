@@ -31,8 +31,11 @@ func (bucketService *BucketService) BucketExists(ctx context.Context, bucket str
 }
 
 func (bucketService *BucketService) ListObjects(ctx context.Context, bucketName string, options minio.ListObjectsOptions) ([]minio.ObjectInfo, error) {
+
 	var objects []minio.ObjectInfo
+
 	objectCh := bucketService.MinioClient.ListObjects(ctx, bucketName, options)
+
 	for object := range objectCh {
 		if object.Err != nil {
 			return nil, fmt.Errorf("error occurred while listing objects: %w", object.Err)
