@@ -9,6 +9,7 @@ release:
     - cp .env.example .env
     - sed -i "s/APP_HOST=.*/APP_HOST=$APP_HOST/g" .env
     - sed -i "s/MINIO_HOST=.*/MINIO_HOST=$MINIO_HOST/g" .env
+    - sed -i "s/REDIS_HOST=.*/REDIS_HOST=$REDIS_HOST/g" .env
     - mkdir -p build/certs/{app,nginx,minio,redis}
     - cp /etc/letsencrypt/live/$APP_HOST/* build/certs/app
     - cp /etc/letsencrypt/live/$APP_HOST/* build/certs/nginx
