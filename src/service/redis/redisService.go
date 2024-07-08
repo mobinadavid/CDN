@@ -44,7 +44,7 @@ func (redisService *RedisService) CheckAndIncrementRateLimit(ip, userAgent strin
 	}
 
 	// If count exceeds the limit (10 in this case), reject the request
-	if count >= 100 {
+	if count >= 10 {
 		return false, nil
 	}
 

@@ -103,11 +103,21 @@ func (objectController *ObjectController) GetObject(c *gin.Context) {
 
 	var objectName string
 
-	bucketName := c.Param("bucket")
+	bucket := c.Param("bucket")
 	fileName := c.Param("file")
 
-	if bucketName == "" || fileName == "" {
+	if bucket == "" || fileName == "" {
 		response.Api(c).SetMessage("bucket or file is missing.").SetStatusCode(http.StatusUnprocessableEntity).Send()
+		return
+	}
+
+	exists, err := objectController.bucketService.BucketExists(context.Background(), bucket)
+	if err != nil {
+		response.Api(c).SetMessage("failed to check if bucket exists.").SetStatusCode(http.StatusUnprocessableEntity).Send()
+		return
+	}
+	if !exists {
+		response.Api(c).SetMessage("The specified bucket does not exist.").SetStatusCode(http.StatusUnprocessableEntity).Send()
 		return
 	}
 
@@ -118,7 +128,7 @@ func (objectController *ObjectController) GetObject(c *gin.Context) {
 		objectName = fileName
 	}
 
-	file, err := objectController.objectService.GetObject(context.Background(), bucketName, objectName, minio2.GetObjectOptions{})
+	file, err := objectController.objectService.GetObject(context.Background(), bucket, objectName, minio2.GetObjectOptions{})
 	if err != nil {
 		response.Api(c).SetStatusCode(http.StatusNotFound).Send()
 		return
@@ -272,6 +282,16 @@ func (objectController *ObjectController) GetTag(c *gin.Context) {
 		return
 	}
 
+	exists, err := objectController.bucketService.BucketExists(context.Background(), bucket)
+	if err != nil {
+		response.Api(c).SetMessage("failed to check if bucket exists.").SetStatusCode(http.StatusUnprocessableEntity).Send()
+		return
+	}
+	if !exists {
+		response.Api(c).SetMessage("The specified bucket does not exist.").SetStatusCode(http.StatusUnprocessableEntity).Send()
+		return
+	}
+
 	urls, err := objectController.objectService.GetTag(ctx, bucket, tagsStr)
 	if err != nil {
 		response.Api(c).SetMessage("Failed to get objects by tags.").SetStatusCode(http.StatusInternalServerError).Send()
@@ -282,7 +302,49 @@ func (objectController *ObjectController) GetTag(c *gin.Context) {
 		SetMessage("urls retrieved successfully").
 		SetStatusCode(http.StatusOK).
 		SetData(map[string]interface{}{
-			"urls :": urls,
+			"objects": urls,
 		}).Send()
 
+}
+
+func (objectController *ObjectController) RemoveTag(c *gin.Context) {
+
+	bucket := c.Param("bucket")
+	file := c.Param("object")
+
+	if bucket == "" || file == "" {
+		response.Api(c).SetMessage("bucket or file is missing.").SetStatusCode(http.StatusUnprocessableEntity).Send()
+		return
+	}
+
+	exists, err := objectController.bucketService.BucketExists(context.Background(), bucket)
+	if err != nil {
+		response.Api(c).SetMessage("failed to check if bucket exists.").SetStatusCode(http.StatusUnprocessableEntity).Send()
+		return
+	}
+	if !exists {
+		response.Api(c).SetMessage("The specified bucket does not exist.").SetStatusCode(http.StatusUnprocessableEntity).Send()
+		return
+	}
+
+	if strings.Contains(file, "_") {
+		splitString := strings.Split(file, "_")
+		file = splitString[0] + "/" + splitString[1]
+	}
+
+	err = objectController.objectService.GetObjectTagging(context.Background(), bucket, file, minio2.GetObjectTaggingOptions{})
+	if err != nil {
+		response.Api(c).SetMessage("object doesnt have any tag").SetStatusCode(http.StatusInternalServerError).Send()
+		return
+	}
+
+	err = objectController.objectService.RemoveObjectTagging(context.Background(), bucket, file, minio2.RemoveObjectTaggingOptions{})
+	if err != nil {
+		response.Api(c).SetMessage("can't remove the tag").SetStatusCode(http.StatusUnprocessableEntity).Send()
+		return
+	}
+
+	response.Api(c).
+		SetMessage("removed successfully").
+		SetStatusCode(http.StatusOK).Send()
 }

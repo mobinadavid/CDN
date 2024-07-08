@@ -168,3 +168,15 @@ func (objectService *ObjectService) ObjectExists(existingObject []string, object
 	}
 	return true
 }
+
+func (objectService *ObjectService) RemoveObjectTagging(background context.Context, bucket string, file string, options minio.RemoveObjectTaggingOptions) error {
+	err := objectService.MinioClient.RemoveObjectTagging(background, bucket, file, options)
+	return err
+}
+func (objectService *ObjectService) GetObjectTagging(background context.Context, bucket string, file string, options minio.GetObjectTaggingOptions) error {
+	tags, err := objectService.MinioClient.GetObjectTagging(background, bucket, file, options)
+	if tags == nil || err != nil {
+		return err
+	}
+	return nil
+}
