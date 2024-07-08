@@ -71,8 +71,6 @@ services:
     container_name: redis.${APP_HOST}
     restart: unless-stopped
     command: redis-server /usr/local/etc/redis/redis.conf --requirepass ${REDIS_PASSWORD}
-    ports:
-      - ${REDIS_PORT:-6379}:6379
     volumes:
       - ./build/certs/redis:/etc/redis/certs:ro
       - ./build/docker/redis/redis.conf:/usr/local/etc/redis/redis.conf:ro
