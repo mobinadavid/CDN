@@ -332,6 +332,12 @@ func (objectController *ObjectController) RemoveTag(c *gin.Context) {
 		file = splitString[0] + "/" + splitString[1]
 	}
 
+	err = objectController.objectService.GetObjectTagging(context.Background(), bucket, file, minio2.GetObjectTaggingOptions{})
+	if err != nil {
+		response.Api(c).SetMessage("object doesnt have any tag").SetStatusCode(http.StatusInternalServerError).Send()
+		return
+	}
+
 	err = objectController.objectService.RemoveObjectTagging(context.Background(), bucket, file, minio2.RemoveObjectTaggingOptions{})
 	if err != nil {
 		response.Api(c).SetMessage("can't remove the tag").SetStatusCode(http.StatusUnprocessableEntity).Send()
