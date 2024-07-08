@@ -61,7 +61,7 @@ func (objectService *ObjectService) PutObject(ctx context.Context, bucket string
 			"url": fmt.Sprintf("%s://%s/%s/%s/%s/%s/%s",
 				ctx.Value("Scheme"),
 				ctx.Value("Host"),
-				"api/v1/storage/app",
+				"app/api/v1/storage",
 				"buckets",
 				bucket,
 				"files",
