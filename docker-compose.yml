@@ -37,11 +37,9 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
-    ports:
-      - "9000:9000"
     volumes:
       - ./build/certs/minio:/etc/minio/certs:ro
-      - minio:/data
+      - minio-data:/data
     networks:
       - cdn
   # Nginx
@@ -80,14 +78,14 @@ services:
       TZ: ${APP_TZ}
     healthcheck:
       test: [ "CMD-SHELL", "redis-cli -a ${REDIS_PASSWORD} --tls ping" ]
-      interval: 10s
+      interval: 5s
       timeout: 5s
       retries: 5
     networks:
       - cdn
 # Volumes
 volumes:
-  minio:
+  minio-data:
   redis-data:
 # Networks
 networks:
