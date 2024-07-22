@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	_ "cdn/src/api/http/requests"
 	"cdn/src/api/http/response"
 	"cdn/src/service/minio"
 	"context"
@@ -20,6 +21,16 @@ func NewBucketController(bucketService *minio.BucketService, objectService *mini
 	}
 }
 
+// MakeBucket handles make bucket requests
+// @Summary Add new bucket
+// @Description Adds a new bucket with the given details.
+// @Tags CDN
+// @Param bucket query string  true "bucket"
+// @Accept  json
+// @Produce  json
+// @Success 200 {object} requests.successMakeBucketRequest
+// @Failure 400 {object} CategoryRequests.failureMakeBucketRequest
+// @Router /storage/buckets/:bucket [post]
 func (bucketController *BucketController) MakeBucket(c *gin.Context) {
 
 	bucketName := c.Param("bucket")
@@ -51,6 +62,16 @@ func (bucketController *BucketController) MakeBucket(c *gin.Context) {
 
 }
 
+// RemoveBucket handles bucket remove requests
+// @Summary Delete bucket
+// @Description Delete a bucket with the given uuid.
+// @Param bucket query string true "bucket"
+// @Tags CDN
+// @Accept  json
+// @Produce  json
+// @Success 200 {object} requests.successRemoveBucketRequest
+// @Failure 400 {object} requests.failureRemoveBucketRequest
+// @Router /storage/buckets/:bucket [delete]
 func (bucketController *BucketController) RemoveBucket(c *gin.Context) {
 
 	bucketName := c.Param("bucket")
@@ -87,6 +108,16 @@ func (bucketController *BucketController) RemoveBucket(c *gin.Context) {
 
 }
 
+// ListObject handles pagination of objects.
+// @Summary Get objects paginated data
+// @Description Gets objects data with pagination.
+// @Param bucket query string true "bucket"
+// @Tags CDN
+// @Accept  json
+// @Produce  json
+// @Success 200 {object} requests.successGetObjectListRequest
+// @Failure 400 {object} requests.failureGetObjectListRequest
+// @Router /storage/buckets/:bucket/objects [get]
 func (bucketController *BucketController) ListObject(c *gin.Context) {
 
 	bucketName := c.Param("bucket")
@@ -128,6 +159,15 @@ func (bucketController *BucketController) ListObject(c *gin.Context) {
 
 }
 
+// ListBucket handles pagination of buckets.
+// @Summary Get buckets paginated data
+// @Description Gets buckets data with pagination.
+// @Tags CDN
+// @Accept  json
+// @Produce  json
+// @Success 200 {object} requests.successGetBucketListRequest
+// @Failure 400 {object} requests.failureGetBucketListRequest
+// @Router /storage [get]
 func (bucketController *BucketController) ListBucket(c *gin.Context) {
 
 	buckets, err := bucketController.bucketService.ListBucket(context.Background())

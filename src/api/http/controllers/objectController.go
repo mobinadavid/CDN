@@ -25,6 +25,15 @@ func NewObjectController(bucketService *minio.BucketService, objectService *mini
 	}
 }
 
+// PutObject handles put object on bucket requests
+// @Summary Add new object to bucket
+// @Description Adds a new object to bucket with the given details.
+// @Tags CDN
+// @Param files formData file true "File to upload"
+// @Param bucket formData string true "Bucket name"
+// @Success 200 {object} requests.successPutObjectRequest
+// @Failure 400 {object} requests.failurePutObjectRequest
+// @Router /storage [post]
 func (objectController *ObjectController) PutObject(c *gin.Context) {
 
 	form, err := c.MultipartForm()
@@ -99,6 +108,17 @@ func (objectController *ObjectController) PutObject(c *gin.Context) {
 
 }
 
+// GetObject handles get data of object.
+// @Summary Get object
+// @Description Gets object data with specified filename.
+// @Param bucket query string true "bucket"
+// @Param file query string true "file"
+// @Tags CDN
+// @Accept  json
+// @Produce  json
+// @Success 200 {object} requests.successGetObjectRequest
+// @Failure 400 {object} requests.failureGetObjectRequest
+// @Router /storage/buckets/:bucket/files/:file
 func (objectController *ObjectController) GetObject(c *gin.Context) {
 
 	var objectName string
@@ -155,6 +175,16 @@ func (objectController *ObjectController) GetObject(c *gin.Context) {
 
 }
 
+// RemoveObjects handles objects remove requests
+// @Summary Delete objects of a bucket
+// @Description Delete objects of a bucket.
+// @Param bucket query string true "bucket"
+// @Tags CDN
+// @Accept  json
+// @Produce  json
+// @Success 200 {object} requests.successRemoveObjectsRequest
+// @Failure 400 {object} requests.failureRemoveObjectsRequest
+// @Router /storage/buckets/:bucket/objects [delete]
 func (objectController *ObjectController) RemoveObjects(c *gin.Context) {
 
 	bucket := c.Param("bucket")
@@ -202,6 +232,17 @@ func (objectController *ObjectController) RemoveObjects(c *gin.Context) {
 
 }
 
+// RemoveObject handles object remove requests
+// @Summary Delete object
+// @Description Delete an object with the file.
+// @Param bucket query string true "bucket"
+// @Param file query string true "file"
+// @Tags CDN
+// @Accept  json
+// @Produce  json
+// @Success 200 {object} requests.successRemoveObjectRequest
+// @Failure 400 {object} requests.failureRemoveObjectRequest
+// @Router /storage/buckets/:bucket/files/:file [delete]
 func (objectController *ObjectController) RemoveObject(c *gin.Context) {
 
 	bucket := c.Param("bucket")
@@ -268,6 +309,18 @@ func (objectController *ObjectController) RemoveObject(c *gin.Context) {
 		}).Send()
 
 }
+
+// GetTag handles get data of tag.
+// @Summary Get tag
+// @Description Gets tag data.
+// @Param bucket query string true "bucket"
+// @Param file query string true "file"
+// @Tags CDN
+// @Accept  json
+// @Produce  json
+// @Success 200 {object} AdminRequests.successGetTagRequest
+// @Failure 400 {object} AdminRequests.failureGetTagRequest
+// @Router /storage/buckets/:bucket/tags/:tag [get]
 func (objectController *ObjectController) GetTag(c *gin.Context) {
 
 	bucket := c.Param("bucket")
@@ -307,6 +360,17 @@ func (objectController *ObjectController) GetTag(c *gin.Context) {
 
 }
 
+// RemoveTag handles tag remove requests
+// @Summary Delete tag
+// @Description Delete a tag with the given object.
+// @Param bucket query string true "bucket"
+// @Param object query string true "object"
+// @Tags CDN
+// @Accept  json
+// @Produce  json
+// @Success 200 {object} requests.successRemoveTagRequest
+// @Failure 400 {object} requests.failureRemoveTagRequest
+// @Router /storage/buckets/:bucket/objects/:object [delete]
 func (objectController *ObjectController) RemoveTag(c *gin.Context) {
 
 	bucket := c.Param("bucket")
