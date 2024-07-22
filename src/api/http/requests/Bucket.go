@@ -1,5 +1,15 @@
 package requests
 
+import "time"
+
+type Bucket struct {
+	Name         string    `json:"name"`
+	CreationDate time.Time `json:"creationDate" example:"2020-01-01"`
+}
+type object struct {
+	Url string `json:"url"`
+}
+
 // successMakeBucketRequest struct for showing swagger format of success response for create bucket
 type successMakeBucketRequest struct {
 	IsSuccessful bool   `json:"is_successful"`
@@ -30,6 +40,7 @@ type successRemoveBucketRequest struct {
 	StatusCode   int    `json:"status_code"`
 	Message      string `json:"message"`
 	Data         struct {
+		Bucket string `json:"bucket"`
 	} `json:"data,omitempty"`
 }
 
@@ -61,12 +72,7 @@ type successGetBucketListRequest struct {
 	StatusCode   int    `json:"status_code"`
 	Message      string `json:"message"`
 	Data         struct {
-		Users struct {
-			Limit       int `json:"limit"`
-			CurrentPage int `json:"current_page"`
-			TotalPages  int `json:"total_pages"`
-			TotalItems  int `json:"total_items"`
-		}
+		Buckets Bucket `json:"buckets"`
 	} `json:"data,omitempty"`
 }
 
@@ -88,6 +94,7 @@ type successGetTagRequest struct {
 	StatusCode   int    `json:"status_code"`
 	Message      string `json:"message"`
 	Data         struct {
+		Objects []object `json:"objects"`
 	} `json:"data,omitempty"`
 }
 
