@@ -29,7 +29,7 @@ func NewBucketController(bucketService *minio.BucketService, objectService *mini
 // @Accept  json
 // @Produce  json
 // @Success 200 {object} requests.successMakeBucketRequest
-// @Failure 400 {object} CategoryRequests.failureMakeBucketRequest
+// @Failure 400 {object} requests.failureMakeBucketRequest
 // @Router /storage/buckets/:bucket [post]
 func (bucketController *BucketController) MakeBucket(c *gin.Context) {
 

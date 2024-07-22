@@ -24,6 +24,8 @@ services:
     image: minio/minio:latest
     container_name: minio.$APP_HOST
     restart: unless-stopped
+    ports:
+      - "9000:9000"
     command: server --certs-dir /etc/minio/certs --console-address :9001 /data
     tty: true
     environment:
@@ -66,6 +68,8 @@ services:
   # Redis
   redis:
     image: redis:alpine
+    ports:
+      - "6379:6379"
     container_name: redis.${APP_HOST}
     restart: unless-stopped
     command: redis-server /usr/local/etc/redis/redis.conf --requirepass ${REDIS_PASSWORD}

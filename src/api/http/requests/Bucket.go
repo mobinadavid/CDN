@@ -8,6 +8,7 @@ type successMakeBucketRequest struct {
 	StatusCode   int    `json:"status_code"`
 	Message      string `json:"message"`
 	Data         struct {
+		Bucket string `json:"bucket"`
 	} `json:"data,omitempty"`
 }
 

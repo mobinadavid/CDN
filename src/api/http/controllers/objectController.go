@@ -118,7 +118,7 @@ func (objectController *ObjectController) PutObject(c *gin.Context) {
 // @Produce  json
 // @Success 200 {object} requests.successGetObjectRequest
 // @Failure 400 {object} requests.failureGetObjectRequest
-// @Router /storage/buckets/:bucket/files/:file
+// @Router /storage/buckets/:bucket/files/:file [get]
 func (objectController *ObjectController) GetObject(c *gin.Context) {
 
 	var objectName string
@@ -318,8 +318,8 @@ func (objectController *ObjectController) RemoveObject(c *gin.Context) {
 // @Tags CDN
 // @Accept  json
 // @Produce  json
-// @Success 200 {object} AdminRequests.successGetTagRequest
-// @Failure 400 {object} AdminRequests.failureGetTagRequest
+// @Success 200 {object} requests.successGetTagRequest
+// @Failure 400 {object} requests.failureGetTagRequest
 // @Router /storage/buckets/:bucket/tags/:tag [get]
 func (objectController *ObjectController) GetTag(c *gin.Context) {
 
