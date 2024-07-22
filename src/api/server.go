@@ -65,6 +65,7 @@ func initServer() error {
 	{
 		routes.ObjectRoutes(v1)
 		routes.BucketRoutes(v1)
+		routes.SwaggerRoutes(v1)
 	}
 
 	// Run App.
