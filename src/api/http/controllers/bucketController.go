@@ -145,7 +145,7 @@ func (bucketController *BucketController) ListObject(c *gin.Context) {
 	objectList := make([]map[string]interface{}, 0, len(objects))
 	for _, object := range objects {
 		objectList = append(objectList, map[string]interface{}{
-			"info:": object,
+			"info": object,
 		})
 	}
 
@@ -153,8 +153,8 @@ func (bucketController *BucketController) ListObject(c *gin.Context) {
 		SetMessage("listed successfully").
 		SetStatusCode(http.StatusOK).
 		SetData(map[string]interface{}{
-			"number of objects:": len(objectList),
-			"objects:":           objectList,
+			"number of objects": len(objectList),
+			"objects":           objectList,
 		}).Send()
 
 }
@@ -176,7 +176,7 @@ func (bucketController *BucketController) ListBucket(c *gin.Context) {
 	}
 
 	response.Api(c).
-		SetMessage("Bucket created successfully").
+		SetMessage("Listed successfully").
 		SetStatusCode(http.StatusOK).
 		SetData(map[string]interface{}{
 			"buckets": buckets,
