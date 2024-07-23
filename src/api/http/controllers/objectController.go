@@ -29,6 +29,7 @@ func NewObjectController(bucketService *minio.BucketService, objectService *mini
 // @Summary Add new object to bucket
 // @Description Adds a new object to bucket with the given details.
 // @Tags CDN
+// @Accept multipart/form-data
 // @Param files formData file true "File to upload"
 // @Param bucket formData string true "Bucket name"
 // @Success 200 {object} requests.successPutObjectRequest

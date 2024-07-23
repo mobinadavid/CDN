@@ -1,0 +1,723 @@
+basePath: /api/v1
+definitions:
+  requests.Bucket:
+    properties:
+      creationDate:
+        example: "2020-01-01"
+        type: string
+      name:
+        type: string
+    type: object
+  requests.Info:
+    properties:
+      ChecksumCRC32:
+        type: string
+      ChecksumCRC32C:
+        type: string
+      ChecksumSHA1:
+        type: string
+      ChecksumSHA256:
+        type: string
+      Expiration:
+        type: string
+      ExpirationRuleID:
+        type: string
+      Grant:
+        description: Use *interface{} to handle null values
+      Internal:
+        description: Use *interface{} to handle null values
+      IsDeleteMarker:
+        type: boolean
+      IsLatest:
+        type: boolean
+      Owner:
+        $ref: '#/definitions/requests.Owner'
+      ReplicationReady:
+        type: boolean
+      ReplicationStatus:
+        type: string
+      Restore:
+        description: Use *interface{} to handle null values
+      UserTagCount:
+        type: integer
+      VersionID:
+        type: string
+      contentType:
+        type: string
+      etag:
+        type: string
+      expires:
+        type: string
+      lastModified:
+        type: string
+      metadata:
+        description: Use *interface{} to handle null values
+      name:
+        type: string
+      size:
+        type: integer
+      storageClass:
+        type: string
+    type: object
+  requests.Owner:
+    properties:
+      id:
+        type: string
+      name:
+        type: string
+      owner:
+        properties:
+          Local:
+            type: string
+          Space:
+            type: string
+        type: object
+    type: object
+  requests.failureGetBucketListRequest:
+    properties:
+      errors:
+        additionalProperties:
+          type: string
+        type: object
+      is_successful:
+        type: boolean
+      message:
+        type: string
+      request_ip:
+        type: string
+      request_uuid:
+        type: string
+      status_code:
+        type: integer
+    type: object
+  requests.failureGetObjectListRequest:
+    properties:
+      errors:
+        additionalProperties:
+          type: string
+        type: object
+      is_successful:
+        type: boolean
+      message:
+        type: string
+      request_ip:
+        type: string
+      request_uuid:
+        type: string
+      status_code:
+        type: integer
+    type: object
+  requests.failureGetObjectRequest:
+    properties:
+      errors:
+        additionalProperties:
+          type: string
+        type: object
+      is_successful:
+        type: boolean
+      message:
+        type: string
+      request_ip:
+        type: string
+      request_uuid:
+        type: string
+      status_code:
+        type: integer
+    type: object
+  requests.failureGetTagRequest:
+    properties:
+      errors:
+        additionalProperties:
+          type: string
+        type: object
+      is_successful:
+        type: boolean
+      message:
+        type: string
+      request_ip:
+        type: string
+      request_uuid:
+        type: string
+      status_code:
+        type: integer
+    type: object
+  requests.failureMakeBucketRequest:
+    properties:
+      errors:
+        additionalProperties:
+          type: string
+        type: object
+      is_successful:
+        type: boolean
+      message:
+        type: string
+      request_ip:
+        type: string
+      request_uuid:
+        type: string
+      status_code:
+        type: integer
+    type: object
+  requests.failurePutObjectRequest:
+    properties:
+      errors:
+        additionalProperties:
+          type: string
+        type: object
+      is_successful:
+        type: boolean
+      message:
+        type: string
+      request_ip:
+        type: string
+      request_uuid:
+        type: string
+      status_code:
+        type: integer
+    type: object
+  requests.failureRemoveBucketRequest:
+    properties:
+      errors:
+        additionalProperties:
+          type: string
+        type: object
+      is_successful:
+        type: boolean
+      message:
+        type: string
+      request_ip:
+        type: string
+      request_uuid:
+        type: string
+      status_code:
+        type: integer
+    type: object
+  requests.failureRemoveObjectRequest:
+    properties:
+      errors:
+        additionalProperties:
+          type: string
+        type: object
+      is_successful:
+        type: boolean
+      message:
+        type: string
+      request_ip:
+        type: string
+      request_uuid:
+        type: string
+      status_code:
+        type: integer
+    type: object
+  requests.failureRemoveObjectsRequest:
+    properties:
+      errors:
+        additionalProperties:
+          type: string
+        type: object
+      is_successful:
+        type: boolean
+      message:
+        type: string
+      request_ip:
+        type: string
+      request_uuid:
+        type: string
+      status_code:
+        type: integer
+    type: object
+  requests.failureRemoveTagRequest:
+    properties:
+      errors:
+        additionalProperties:
+          type: string
+        type: object
+      is_successful:
+        type: boolean
+      message:
+        type: string
+      request_ip:
+        type: string
+      request_uuid:
+        type: string
+      status_code:
+        type: integer
+    type: object
+  requests.object:
+    properties:
+      url:
+        type: string
+    type: object
+  requests.putObjectResponse:
+    properties:
+      file_name:
+        type: string
+      folder:
+        type: string
+      original_file_name:
+        type: string
+      size:
+        type: string
+      url:
+        type: string
+    type: object
+  requests.successGetBucketListRequest:
+    properties:
+      data:
+        properties:
+          buckets:
+            $ref: '#/definitions/requests.Bucket'
+        type: object
+      is_successful:
+        type: boolean
+      message:
+        type: string
+      request_ip:
+        type: string
+      request_uuid:
+        type: string
+      status_code:
+        type: integer
+    type: object
+  requests.successGetObjectListRequest:
+    properties:
+      data:
+        properties:
+          objects:
+            items:
+              $ref: '#/definitions/requests.Info'
+            type: array
+        type: object
+      is_successful:
+        type: boolean
+      message:
+        type: string
+      request_ip:
+        type: string
+      request_uuid:
+        type: string
+      status_code:
+        type: integer
+    type: object
+  requests.successGetObjectRequest:
+    properties:
+      data:
+        type: object
+      is_successful:
+        type: boolean
+      message:
+        type: string
+      request_ip:
+        type: string
+      request_uuid:
+        type: string
+      status_code:
+        type: integer
+    type: object
+  requests.successGetTagRequest:
+    properties:
+      data:
+        properties:
+          objects:
+            items:
+              $ref: '#/definitions/requests.object'
+            type: array
+        type: object
+      is_successful:
+        type: boolean
+      message:
+        type: string
+      request_ip:
+        type: string
+      request_uuid:
+        type: string
+      status_code:
+        type: integer
+    type: object
+  requests.successMakeBucketRequest:
+    properties:
+      data:
+        properties:
+          bucket:
+            type: string
+        type: object
+      is_successful:
+        type: boolean
+      message:
+        type: string
+      request_ip:
+        type: string
+      request_uuid:
+        type: string
+      status_code:
+        type: integer
+    type: object
+  requests.successPutObjectRequest:
+    properties:
+      data:
+        properties:
+          objects:
+            $ref: '#/definitions/requests.putObjectResponse'
+        type: object
+      is_successful:
+        type: boolean
+      message:
+        type: string
+      request_ip:
+        type: string
+      request_uuid:
+        type: string
+      status_code:
+        type: integer
+    type: object
+  requests.successRemoveBucketRequest:
+    properties:
+      data:
+        properties:
+          bucket:
+            type: string
+        type: object
+      is_successful:
+        type: boolean
+      message:
+        type: string
+      request_ip:
+        type: string
+      request_uuid:
+        type: string
+      status_code:
+        type: integer
+    type: object
+  requests.successRemoveObjectRequest:
+    properties:
+      data:
+        properties:
+          'object''s name:':
+            items:
+              type: string
+            type: array
+        type: object
+      is_successful:
+        type: boolean
+      message:
+        type: string
+      request_ip:
+        type: string
+      request_uuid:
+        type: string
+      status_code:
+        type: integer
+    type: object
+  requests.successRemoveObjectsRequest:
+    properties:
+      data:
+        properties:
+          'object''s name:':
+            items:
+              type: string
+            type: array
+        type: object
+      is_successful:
+        type: boolean
+      message:
+        type: string
+      request_ip:
+        type: string
+      request_uuid:
+        type: string
+      status_code:
+        type: integer
+    type: object
+  requests.successRemoveTagRequest:
+    properties:
+      data:
+        type: object
+      is_successful:
+        type: boolean
+      message:
+        type: string
+      request_ip:
+        type: string
+      request_uuid:
+        type: string
+      status_code:
+        type: integer
+    type: object
+host: cdn.omaxplatform.com:9541
+info:
+  contact:
+    email: support@swagger.io
+    name: API Support
+    url: http://www.swagger.io/support
+  description: This is a swagger server for documentation of cdn app.
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  termsOfService: http://swagger.io/terms/
+  title: CDN
+  version: "1.0"
+paths:
+  /storage:
+    get:
+      consumes:
+      - application/json
+      description: Gets buckets data with pagination.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/requests.successGetBucketListRequest'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/requests.failureGetBucketListRequest'
+      summary: Get buckets paginated data
+      tags:
+      - CDN
+    post:
+      consumes:
+      - multipart/form-data
+      description: Adds a new object to bucket with the given details.
+      parameters:
+      - description: File to upload
+        in: formData
+        name: files
+        required: true
+        type: file
+      - description: Bucket name
+        in: formData
+        name: bucket
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/requests.successPutObjectRequest'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/requests.failurePutObjectRequest'
+      summary: Add new object to bucket
+      tags:
+      - CDN
+  /storage/buckets/:bucket:
+    delete:
+      consumes:
+      - application/json
+      description: Delete a bucket with the given uuid.
+      parameters:
+      - description: bucket
+        in: query
+        name: bucket
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/requests.successRemoveBucketRequest'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/requests.failureRemoveBucketRequest'
+      summary: Delete bucket
+      tags:
+      - CDN
+    post:
+      consumes:
+      - application/json
+      description: Adds a new bucket with the given details.
+      parameters:
+      - description: bucket
+        in: query
+        name: bucket
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/requests.successMakeBucketRequest'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/requests.failureMakeBucketRequest'
+      summary: Add new bucket
+      tags:
+      - CDN
+  /storage/buckets/:bucket/files/:file:
+    delete:
+      consumes:
+      - application/json
+      description: Delete an object with the file.
+      parameters:
+      - description: bucket
+        in: query
+        name: bucket
+        required: true
+        type: string
+      - description: file
+        in: query
+        name: file
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/requests.successRemoveObjectRequest'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/requests.failureRemoveObjectRequest'
+      summary: Delete object
+      tags:
+      - CDN
+    get:
+      consumes:
+      - application/json
+      description: Gets object data with specified filename.
+      parameters:
+      - description: bucket
+        in: query
+        name: bucket
+        required: true
+        type: string
+      - description: file
+        in: query
+        name: file
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/requests.successGetObjectRequest'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/requests.failureGetObjectRequest'
+      summary: Get object
+      tags:
+      - CDN
+  /storage/buckets/:bucket/objects:
+    delete:
+      consumes:
+      - application/json
+      description: Delete objects of a bucket.
+      parameters:
+      - description: bucket
+        in: query
+        name: bucket
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/requests.successRemoveObjectsRequest'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/requests.failureRemoveObjectsRequest'
+      summary: Delete objects of a bucket
+      tags:
+      - CDN
+    get:
+      consumes:
+      - application/json
+      description: Gets objects data with pagination.
+      parameters:
+      - description: bucket
+        in: query
+        name: bucket
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/requests.successGetObjectListRequest'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/requests.failureGetObjectListRequest'
+      summary: Get objects paginated data
+      tags:
+      - CDN
+  /storage/buckets/:bucket/objects/:object:
+    delete:
+      consumes:
+      - application/json
+      description: Delete a tag with the given object.
+      parameters:
+      - description: bucket
+        in: query
+        name: bucket
+        required: true
+        type: string
+      - description: object
+        in: query
+        name: object
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/requests.successRemoveTagRequest'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/requests.failureRemoveTagRequest'
+      summary: Delete tag
+      tags:
+      - CDN
+  /storage/buckets/:bucket/tags/:tag:
+    get:
+      consumes:
+      - application/json
+      description: Gets tag data.
+      parameters:
+      - description: bucket
+        in: query
+        name: bucket
+        required: true
+        type: string
+      - description: file
+        in: query
+        name: file
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/requests.successGetTagRequest'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/requests.failureGetTagRequest'
+      summary: Get tag
+      tags:
+      - CDN
+swagger: "2.0"

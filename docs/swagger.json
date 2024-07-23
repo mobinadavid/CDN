@@ -1,0 +1,1100 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "description": "This is a swagger server for documentation of cdn app.",
+        "title": "CDN",
+        "termsOfService": "http://swagger.io/terms/",
+        "contact": {
+            "name": "API Support",
+            "url": "http://www.swagger.io/support",
+            "email": "support@swagger.io"
+        },
+        "license": {
+            "name": "Apache 2.0",
+            "url": "http://www.apache.org/licenses/LICENSE-2.0.html"
+        },
+        "version": "1.0"
+    },
+    "host": "cdn.omaxplatform.com:9541",
+    "basePath": "/api/v1",
+    "paths": {
+        "/storage": {
+            "get": {
+                "description": "Gets buckets data with pagination.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "CDN"
+                ],
+                "summary": "Get buckets paginated data",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/requests.successGetBucketListRequest"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/requests.failureGetBucketListRequest"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "Adds a new object to bucket with the given details.",
+                "consumes": [
+                    "multipart/form-data"
+                ],
+                "tags": [
+                    "CDN"
+                ],
+                "summary": "Add new object to bucket",
+                "parameters": [
+                    {
+                        "type": "file",
+                        "description": "File to upload",
+                        "name": "files",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Bucket name",
+                        "name": "bucket",
+                        "in": "formData",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/requests.successPutObjectRequest"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/requests.failurePutObjectRequest"
+                        }
+                    }
+                }
+            }
+        },
+        "/storage/buckets/:bucket": {
+            "post": {
+                "description": "Adds a new bucket with the given details.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "CDN"
+                ],
+                "summary": "Add new bucket",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "bucket",
+                        "name": "bucket",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/requests.successMakeBucketRequest"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/requests.failureMakeBucketRequest"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "Delete a bucket with the given uuid.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "CDN"
+                ],
+                "summary": "Delete bucket",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "bucket",
+                        "name": "bucket",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/requests.successRemoveBucketRequest"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/requests.failureRemoveBucketRequest"
+                        }
+                    }
+                }
+            }
+        },
+        "/storage/buckets/:bucket/files/:file": {
+            "get": {
+                "description": "Gets object data with specified filename.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "CDN"
+                ],
+                "summary": "Get object",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "bucket",
+                        "name": "bucket",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "file",
+                        "name": "file",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/requests.successGetObjectRequest"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/requests.failureGetObjectRequest"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "Delete an object with the file.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "CDN"
+                ],
+                "summary": "Delete object",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "bucket",
+                        "name": "bucket",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "file",
+                        "name": "file",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/requests.successRemoveObjectRequest"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/requests.failureRemoveObjectRequest"
+                        }
+                    }
+                }
+            }
+        },
+        "/storage/buckets/:bucket/objects": {
+            "get": {
+                "description": "Gets objects data with pagination.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "CDN"
+                ],
+                "summary": "Get objects paginated data",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "bucket",
+                        "name": "bucket",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/requests.successGetObjectListRequest"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/requests.failureGetObjectListRequest"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "Delete objects of a bucket.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "CDN"
+                ],
+                "summary": "Delete objects of a bucket",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "bucket",
+                        "name": "bucket",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/requests.successRemoveObjectsRequest"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/requests.failureRemoveObjectsRequest"
+                        }
+                    }
+                }
+            }
+        },
+        "/storage/buckets/:bucket/objects/:object": {
+            "delete": {
+                "description": "Delete a tag with the given object.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "CDN"
+                ],
+                "summary": "Delete tag",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "bucket",
+                        "name": "bucket",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "object",
+                        "name": "object",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/requests.successRemoveTagRequest"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/requests.failureRemoveTagRequest"
+                        }
+                    }
+                }
+            }
+        },
+        "/storage/buckets/:bucket/tags/:tag": {
+            "get": {
+                "description": "Gets tag data.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "CDN"
+                ],
+                "summary": "Get tag",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "bucket",
+                        "name": "bucket",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "file",
+                        "name": "file",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/requests.successGetTagRequest"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/requests.failureGetTagRequest"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "requests.Bucket": {
+            "type": "object",
+            "properties": {
+                "creationDate": {
+                    "type": "string",
+                    "example": "2020-01-01"
+                },
+                "name": {
+                    "type": "string"
+                }
+            }
+        },
+        "requests.Info": {
+            "type": "object",
+            "properties": {
+                "ChecksumCRC32": {
+                    "type": "string"
+                },
+                "ChecksumCRC32C": {
+                    "type": "string"
+                },
+                "ChecksumSHA1": {
+                    "type": "string"
+                },
+                "ChecksumSHA256": {
+                    "type": "string"
+                },
+                "Expiration": {
+                    "type": "string"
+                },
+                "ExpirationRuleID": {
+                    "type": "string"
+                },
+                "Grant": {
+                    "description": "Use *interface{} to handle null values"
+                },
+                "Internal": {
+                    "description": "Use *interface{} to handle null values"
+                },
+                "IsDeleteMarker": {
+                    "type": "boolean"
+                },
+                "IsLatest": {
+                    "type": "boolean"
+                },
+                "Owner": {
+                    "$ref": "#/definitions/requests.Owner"
+                },
+                "ReplicationReady": {
+                    "type": "boolean"
+                },
+                "ReplicationStatus": {
+                    "type": "string"
+                },
+                "Restore": {
+                    "description": "Use *interface{} to handle null values"
+                },
+                "UserTagCount": {
+                    "type": "integer"
+                },
+                "VersionID": {
+                    "type": "string"
+                },
+                "contentType": {
+                    "type": "string"
+                },
+                "etag": {
+                    "type": "string"
+                },
+                "expires": {
+                    "type": "string"
+                },
+                "lastModified": {
+                    "type": "string"
+                },
+                "metadata": {
+                    "description": "Use *interface{} to handle null values"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "size": {
+                    "type": "integer"
+                },
+                "storageClass": {
+                    "type": "string"
+                }
+            }
+        },
+        "requests.Owner": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "owner": {
+                    "type": "object",
+                    "properties": {
+                        "Local": {
+                            "type": "string"
+                        },
+                        "Space": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "requests.failureGetBucketListRequest": {
+            "type": "object",
+            "properties": {
+                "errors": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    }
+                },
+                "is_successful": {
+                    "type": "boolean"
+                },
+                "message": {
+                    "type": "string"
+                },
+                "request_ip": {
+                    "type": "string"
+                },
+                "request_uuid": {
+                    "type": "string"
+                },
+                "status_code": {
+                    "type": "integer"
+                }
+            }
+        },
+        "requests.failureGetObjectListRequest": {
+            "type": "object",
+            "properties": {
+                "errors": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    }
+                },
+                "is_successful": {
+                    "type": "boolean"
+                },
+                "message": {
+                    "type": "string"
+                },
+                "request_ip": {
+                    "type": "string"
+                },
+                "request_uuid": {
+                    "type": "string"
+                },
+                "status_code": {
+                    "type": "integer"
+                }
+            }
+        },
+        "requests.failureGetObjectRequest": {
+            "type": "object",
+            "properties": {
+                "errors": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    }
+                },
+                "is_successful": {
+                    "type": "boolean"
+                },
+                "message": {
+                    "type": "string"
+                },
+                "request_ip": {
+                    "type": "string"
+                },
+                "request_uuid": {
+                    "type": "string"
+                },
+                "status_code": {
+                    "type": "integer"
+                }
+            }
+        },
+        "requests.failureGetTagRequest": {
+            "type": "object",
+            "properties": {
+                "errors": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    }
+                },
+                "is_successful": {
+                    "type": "boolean"
+                },
+                "message": {
+                    "type": "string"
+                },
+                "request_ip": {
+                    "type": "string"
+                },
+                "request_uuid": {
+                    "type": "string"
+                },
+                "status_code": {
+                    "type": "integer"
+                }
+            }
+        },
+        "requests.failureMakeBucketRequest": {
+            "type": "object",
+            "properties": {
+                "errors": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    }
+                },
+                "is_successful": {
+                    "type": "boolean"
+                },
+                "message": {
+                    "type": "string"
+                },
+                "request_ip": {
+                    "type": "string"
+                },
+                "request_uuid": {
+                    "type": "string"
+                },
+                "status_code": {
+                    "type": "integer"
+                }
+            }
+        },
+        "requests.failurePutObjectRequest": {
+            "type": "object",
+            "properties": {
+                "errors": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    }
+                },
+                "is_successful": {
+                    "type": "boolean"
+                },
+                "message": {
+                    "type": "string"
+                },
+                "request_ip": {
+                    "type": "string"
+                },
+                "request_uuid": {
+                    "type": "string"
+                },
+                "status_code": {
+                    "type": "integer"
+                }
+            }
+        },
+        "requests.failureRemoveBucketRequest": {
+            "type": "object",
+            "properties": {
+                "errors": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    }
+                },
+                "is_successful": {
+                    "type": "boolean"
+                },
+                "message": {
+                    "type": "string"
+                },
+                "request_ip": {
+                    "type": "string"
+                },
+                "request_uuid": {
+                    "type": "string"
+                },
+                "status_code": {
+                    "type": "integer"
+                }
+            }
+        },
+        "requests.failureRemoveObjectRequest": {
+            "type": "object",
+            "properties": {
+                "errors": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    }
+                },
+                "is_successful": {
+                    "type": "boolean"
+                },
+                "message": {
+                    "type": "string"
+                },
+                "request_ip": {
+                    "type": "string"
+                },
+                "request_uuid": {
+                    "type": "string"
+                },
+                "status_code": {
+                    "type": "integer"
+                }
+            }
+        },
+        "requests.failureRemoveObjectsRequest": {
+            "type": "object",
+            "properties": {
+                "errors": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    }
+                },
+                "is_successful": {
+                    "type": "boolean"
+                },
+                "message": {
+                    "type": "string"
+                },
+                "request_ip": {
+                    "type": "string"
+                },
+                "request_uuid": {
+                    "type": "string"
+                },
+                "status_code": {
+                    "type": "integer"
+                }
+            }
+        },
+        "requests.failureRemoveTagRequest": {
+            "type": "object",
+            "properties": {
+                "errors": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    }
+                },
+                "is_successful": {
+                    "type": "boolean"
+                },
+                "message": {
+                    "type": "string"
+                },
+                "request_ip": {
+                    "type": "string"
+                },
+                "request_uuid": {
+                    "type": "string"
+                },
+                "status_code": {
+                    "type": "integer"
+                }
+            }
+        },
+        "requests.object": {
+            "type": "object",
+            "properties": {
+                "url": {
+                    "type": "string"
+                }
+            }
+        },
+        "requests.putObjectResponse": {
+            "type": "object",
+            "properties": {
+                "file_name": {
+                    "type": "string"
+                },
+                "folder": {
+                    "type": "string"
+                },
+                "original_file_name": {
+                    "type": "string"
+                },
+                "size": {
+                    "type": "string"
+                },
+                "url": {
+                    "type": "string"
+                }
+            }
+        },
+        "requests.successGetBucketListRequest": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "object",
+                    "properties": {
+                        "buckets": {
+                            "$ref": "#/definitions/requests.Bucket"
+                        }
+                    }
+                },
+                "is_successful": {
+                    "type": "boolean"
+                },
+                "message": {
+                    "type": "string"
+                },
+                "request_ip": {
+                    "type": "string"
+                },
+                "request_uuid": {
+                    "type": "string"
+                },
+                "status_code": {
+                    "type": "integer"
+                }
+            }
+        },
+        "requests.successGetObjectListRequest": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "object",
+                    "properties": {
+                        "objects": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/requests.Info"
+                            }
+                        }
+                    }
+                },
+                "is_successful": {
+                    "type": "boolean"
+                },
+                "message": {
+                    "type": "string"
+                },
+                "request_ip": {
+                    "type": "string"
+                },
+                "request_uuid": {
+                    "type": "string"
+                },
+                "status_code": {
+                    "type": "integer"
+                }
+            }
+        },
+        "requests.successGetObjectRequest": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "object"
+                },
+                "is_successful": {
+                    "type": "boolean"
+                },
+                "message": {
+                    "type": "string"
+                },
+                "request_ip": {
+                    "type": "string"
+                },
+                "request_uuid": {
+                    "type": "string"
+                },
+                "status_code": {
+                    "type": "integer"
+                }
+            }
+        },
+        "requests.successGetTagRequest": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "object",
+                    "properties": {
+                        "objects": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/requests.object"
+                            }
+                        }
+                    }
+                },
+                "is_successful": {
+                    "type": "boolean"
+                },
+                "message": {
+                    "type": "string"
+                },
+                "request_ip": {
+                    "type": "string"
+                },
+                "request_uuid": {
+                    "type": "string"
+                },
+                "status_code": {
+                    "type": "integer"
+                }
+            }
+        },
+        "requests.successMakeBucketRequest": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "object",
+                    "properties": {
+                        "bucket": {
+                            "type": "string"
+                        }
+                    }
+                },
+                "is_successful": {
+                    "type": "boolean"
+                },
+                "message": {
+                    "type": "string"
+                },
+                "request_ip": {
+                    "type": "string"
+                },
+                "request_uuid": {
+                    "type": "string"
+                },
+                "status_code": {
+                    "type": "integer"
+                }
+            }
+        },
+        "requests.successPutObjectRequest": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "object",
+                    "properties": {
+                        "objects": {
+                            "$ref": "#/definitions/requests.putObjectResponse"
+                        }
+                    }
+                },
+                "is_successful": {
+                    "type": "boolean"
+                },
+                "message": {
+                    "type": "string"
+                },
+                "request_ip": {
+                    "type": "string"
+                },
+                "request_uuid": {
+                    "type": "string"
+                },
+                "status_code": {
+                    "type": "integer"
+                }
+            }
+        },
+        "requests.successRemoveBucketRequest": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "object",
+                    "properties": {
+                        "bucket": {
+                            "type": "string"
+                        }
+                    }
+                },
+                "is_successful": {
+                    "type": "boolean"
+                },
+                "message": {
+                    "type": "string"
+                },
+                "request_ip": {
+                    "type": "string"
+                },
+                "request_uuid": {
+                    "type": "string"
+                },
+                "status_code": {
+                    "type": "integer"
+                }
+            }
+        },
+        "requests.successRemoveObjectRequest": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "object",
+                    "properties": {
+                        "object's name:": {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                },
+                "is_successful": {
+                    "type": "boolean"
+                },
+                "message": {
+                    "type": "string"
+                },
+                "request_ip": {
+                    "type": "string"
+                },
+                "request_uuid": {
+                    "type": "string"
+                },
+                "status_code": {
+                    "type": "integer"
+                }
+            }
+        },
+        "requests.successRemoveObjectsRequest": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "object",
+                    "properties": {
+                        "object's name:": {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                },
+                "is_successful": {
+                    "type": "boolean"
+                },
+                "message": {
+                    "type": "string"
+                },
+                "request_ip": {
+                    "type": "string"
+                },
+                "request_uuid": {
+                    "type": "string"
+                },
+                "status_code": {
+                    "type": "integer"
+                }
+            }
+        },
+        "requests.successRemoveTagRequest": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "object"
+                },
+                "is_successful": {
+                    "type": "boolean"
+                },
+                "message": {
+                    "type": "string"
+                },
+                "request_ip": {
+                    "type": "string"
+                },
+                "request_uuid": {
+                    "type": "string"
+                },
+                "status_code": {
+                    "type": "integer"
+                }
+            }
+        }
+    }
+}

@@ -12,30 +12,26 @@ type Owner struct {
 }
 
 type Info struct {
-	ETag              string       `json:"etag"`
-	Name              string       `json:"name"`
-	LastModified      time.Time    `json:"lastModified"`
-	Size              int64        `json:"size"`
-	ContentType       string       `json:"contentType"`
-	Expires           time.Time    `json:"expires"`
-	Metadata          *interface{} `json:"metadata"` // Use *interface{} to handle null values
-	UserTagCount      int          `json:"UserTagCount"`
-	Owner             Owner        `json:"Owner"`
-	Grant             *interface{} `json:"Grant"` // Use *interface{} to handle null values
-	StorageClass      string       `json:"storageClass"`
-	IsLatest          bool         `json:"IsLatest"`
-	IsDeleteMarker    bool         `json:"IsDeleteMarker"`
-	VersionID         string       `json:"VersionID"`
-	ReplicationStatus string       `json:"ReplicationStatus"`
-	ReplicationReady  bool         `json:"ReplicationReady"`
-	Expiration        time.Time    `json:"Expiration"`
-	ExpirationRuleID  string       `json:"ExpirationRuleID"`
-	Restore           *interface{} `json:"Restore"` // Use *interface{} to handle null values
-	ChecksumCRC32     string       `json:"ChecksumCRC32"`
-	ChecksumCRC32C    string       `json:"ChecksumCRC32C"`
-	ChecksumSHA1      string       `json:"ChecksumSHA1"`
-	ChecksumSHA256    string       `json:"ChecksumSHA256"`
-	Internal          *interface{} `json:"Internal"` // Use *interface{} to handle null values
+	ETag              string    `json:"etag"`
+	Name              string    `json:"name"`
+	LastModified      time.Time `json:"lastModified"`
+	Size              int64     `json:"size"`
+	ContentType       string    `json:"contentType"`
+	Expires           time.Time `json:"expires"`
+	UserTagCount      int       `json:"UserTagCount"`
+	Owner             Owner     `json:"Owner"`
+	StorageClass      string    `json:"storageClass"`
+	IsLatest          bool      `json:"IsLatest"`
+	IsDeleteMarker    bool      `json:"IsDeleteMarker"`
+	VersionID         string    `json:"VersionID"`
+	ReplicationStatus string    `json:"ReplicationStatus"`
+	ReplicationReady  bool      `json:"ReplicationReady"`
+	Expiration        time.Time `json:"Expiration"`
+	ExpirationRuleID  string    `json:"ExpirationRuleID"`
+	ChecksumCRC32     string    `json:"ChecksumCRC32"`
+	ChecksumCRC32C    string    `json:"ChecksumCRC32C"`
+	ChecksumSHA1      string    `json:"ChecksumSHA1"`
+	ChecksumSHA256    string    `json:"ChecksumSHA256"`
 }
 type putObjectResponse struct {
 	FileName         string `json:"file_name"`
@@ -75,7 +71,7 @@ type successPutObjectRequest struct {
 	StatusCode   int    `json:"status_code"`
 	Message      string `json:"message"`
 	Data         struct {
-		Object putObjectResponse `json:"objects"`
+		Objects putObjectResponse `json:"objects"`
 	} `json:"data,omitempty"`
 }
 
@@ -151,5 +147,6 @@ type successGetObjectRequest struct {
 	StatusCode   int    `json:"status_code"`
 	Message      string `json:"message"`
 	Data         struct {
+		Object putObjectResponse `json:"objects"`
 	} `json:"data,omitempty"`
 }
