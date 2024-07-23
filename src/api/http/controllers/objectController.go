@@ -222,7 +222,7 @@ func (objectController *ObjectController) RemoveObjects(c *gin.Context) {
 		SetMessage("all removed successfully").
 		SetStatusCode(http.StatusOK).
 		SetData(map[string]interface{}{
-			"object's name:": objectList,
+			"object's name": objectList,
 		}).Send()
 }
 
@@ -298,7 +298,7 @@ func (objectController *ObjectController) RemoveObject(c *gin.Context) {
 		SetMessage("removed successfully").
 		SetStatusCode(http.StatusOK).
 		SetData(map[string]interface{}{
-			"object's name:": objectList,
+			"object's name": objectList,
 		}).Send()
 }
 

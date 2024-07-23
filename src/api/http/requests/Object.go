@@ -103,7 +103,7 @@ type successRemoveObjectsRequest struct {
 	StatusCode   int    `json:"status_code"`
 	Message      string `json:"message"`
 	Data         struct {
-		Objects []string `json:"object's name:"`
+		Objects []string `json:"object's name"`
 	} `json:"data,omitempty"`
 }
 
@@ -125,7 +125,7 @@ type successRemoveObjectRequest struct {
 	StatusCode   int    `json:"status_code"`
 	Message      string `json:"message"`
 	Data         struct {
-		Objects []string `json:"object's name:"`
+		Objects []string `json:"object's name"`
 	} `json:"data,omitempty"`
 }
 

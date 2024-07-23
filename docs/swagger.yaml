@@ -387,7 +387,7 @@ definitions:
     properties:
       data:
         properties:
-          'object''s name:':
+          object's name:
             items:
               type: string
             type: array
@@ -407,7 +407,7 @@ definitions:
     properties:
       data:
         properties:
-          'object''s name:':
+          object's name:
             items:
               type: string
             type: array
