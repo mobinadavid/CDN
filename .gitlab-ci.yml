@@ -5,6 +5,8 @@ stages:
 release:
   stage: release
   script:
+    - export http_proxy=172.29.40.97:3999
+    - export https_proxy=172.29.40.97:3999
     - cd $CI_PROJECT_DIR
     - cp .env.example .env
     - sed -i "s/APP_HOST=.*/APP_HOST=$APP_HOST/g" .env
@@ -19,5 +21,7 @@ release:
     - chmod 755 build/certs/redis/*
     - docker compose down
     - docker compose up -d --build
+    - export http_proxy=
+    - export https_proxy=
   only:
     - dev
