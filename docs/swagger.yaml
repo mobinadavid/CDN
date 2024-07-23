@@ -22,10 +22,6 @@ definitions:
         type: string
       ExpirationRuleID:
         type: string
-      Grant:
-        description: Use *interface{} to handle null values
-      Internal:
-        description: Use *interface{} to handle null values
       IsDeleteMarker:
         type: boolean
       IsLatest:
@@ -36,8 +32,6 @@ definitions:
         type: boolean
       ReplicationStatus:
         type: string
-      Restore:
-        description: Use *interface{} to handle null values
       UserTagCount:
         type: integer
       VersionID:
@@ -50,8 +44,6 @@ definitions:
         type: string
       lastModified:
         type: string
-      metadata:
-        description: Use *interface{} to handle null values
       name:
         type: string
       size:
@@ -302,6 +294,9 @@ definitions:
   requests.successGetObjectRequest:
     properties:
       data:
+        properties:
+          objects:
+            $ref: '#/definitions/requests.putObjectResponse'
         type: object
       is_successful:
         type: boolean
@@ -475,7 +470,7 @@ paths:
             $ref: '#/definitions/requests.failureGetBucketListRequest'
       summary: Get buckets paginated data
       tags:
-      - CDN
+      - Bucket
     post:
       consumes:
       - multipart/form-data
@@ -502,7 +497,7 @@ paths:
             $ref: '#/definitions/requests.failurePutObjectRequest'
       summary: Add new object to bucket
       tags:
-      - CDN
+      - Object
   /storage/buckets/:bucket:
     delete:
       consumes:
@@ -527,7 +522,7 @@ paths:
             $ref: '#/definitions/requests.failureRemoveBucketRequest'
       summary: Delete bucket
       tags:
-      - CDN
+      - Bucket
     post:
       consumes:
       - application/json
@@ -551,7 +546,7 @@ paths:
             $ref: '#/definitions/requests.failureMakeBucketRequest'
       summary: Add new bucket
       tags:
-      - CDN
+      - Bucket
   /storage/buckets/:bucket/files/:file:
     delete:
       consumes:
@@ -581,7 +576,7 @@ paths:
             $ref: '#/definitions/requests.failureRemoveObjectRequest'
       summary: Delete object
       tags:
-      - CDN
+      - Object
     get:
       consumes:
       - application/json
@@ -610,7 +605,7 @@ paths:
             $ref: '#/definitions/requests.failureGetObjectRequest'
       summary: Get object
       tags:
-      - CDN
+      - Object
   /storage/buckets/:bucket/objects:
     delete:
       consumes:
@@ -635,7 +630,7 @@ paths:
             $ref: '#/definitions/requests.failureRemoveObjectsRequest'
       summary: Delete objects of a bucket
       tags:
-      - CDN
+      - Object
     get:
       consumes:
       - application/json
@@ -659,7 +654,7 @@ paths:
             $ref: '#/definitions/requests.failureGetObjectListRequest'
       summary: Get objects paginated data
       tags:
-      - CDN
+      - Object
   /storage/buckets/:bucket/objects/:object:
     delete:
       consumes:
@@ -689,7 +684,7 @@ paths:
             $ref: '#/definitions/requests.failureRemoveTagRequest'
       summary: Delete tag
       tags:
-      - CDN
+      - Object
   /storage/buckets/:bucket/tags/:tag:
     get:
       consumes:
@@ -719,5 +714,5 @@ paths:
             $ref: '#/definitions/requests.failureGetTagRequest'
       summary: Get tag
       tags:
-      - CDN
+      - Object
 swagger: "2.0"

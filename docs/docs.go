@@ -34,7 +34,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "CDN"
+                    "Bucket"
                 ],
                 "summary": "Get buckets paginated data",
                 "responses": {
@@ -58,7 +58,7 @@ const docTemplate = `{
                     "multipart/form-data"
                 ],
                 "tags": [
-                    "CDN"
+                    "Object"
                 ],
                 "summary": "Add new object to bucket",
                 "parameters": [
@@ -103,7 +103,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "CDN"
+                    "Bucket"
                 ],
                 "summary": "Add new bucket",
                 "parameters": [
@@ -139,7 +139,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "CDN"
+                    "Bucket"
                 ],
                 "summary": "Delete bucket",
                 "parameters": [
@@ -177,7 +177,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "CDN"
+                    "Object"
                 ],
                 "summary": "Get object",
                 "parameters": [
@@ -220,7 +220,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "CDN"
+                    "Object"
                 ],
                 "summary": "Delete object",
                 "parameters": [
@@ -265,7 +265,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "CDN"
+                    "Object"
                 ],
                 "summary": "Get objects paginated data",
                 "parameters": [
@@ -301,7 +301,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "CDN"
+                    "Object"
                 ],
                 "summary": "Delete objects of a bucket",
                 "parameters": [
@@ -339,7 +339,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "CDN"
+                    "Object"
                 ],
                 "summary": "Delete tag",
                 "parameters": [
@@ -384,7 +384,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "CDN"
+                    "Object"
                 ],
                 "summary": "Get tag",
                 "parameters": [
@@ -454,12 +454,6 @@ const docTemplate = `{
                 "ExpirationRuleID": {
                     "type": "string"
                 },
-                "Grant": {
-                    "description": "Use *interface{} to handle null values"
-                },
-                "Internal": {
-                    "description": "Use *interface{} to handle null values"
-                },
                 "IsDeleteMarker": {
                     "type": "boolean"
                 },
@@ -474,9 +468,6 @@ const docTemplate = `{
                 },
                 "ReplicationStatus": {
                     "type": "string"
-                },
-                "Restore": {
-                    "description": "Use *interface{} to handle null values"
                 },
                 "UserTagCount": {
                     "type": "integer"
@@ -495,9 +486,6 @@ const docTemplate = `{
                 },
                 "lastModified": {
                     "type": "string"
-                },
-                "metadata": {
-                    "description": "Use *interface{} to handle null values"
                 },
                 "name": {
                     "type": "string"
@@ -883,7 +871,12 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "data": {
-                    "type": "object"
+                    "type": "object",
+                    "properties": {
+                        "objects": {
+                            "$ref": "#/definitions/requests.putObjectResponse"
+                        }
+                    }
                 },
                 "is_successful": {
                     "type": "boolean"
