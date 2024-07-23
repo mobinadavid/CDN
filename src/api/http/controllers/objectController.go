@@ -33,7 +33,7 @@ func NewObjectController(bucketService *minio.BucketService, objectService *mini
 // @Param bucket formData string true "Bucket name"
 // @Success 200 {object} requests.successPutObjectRequest
 // @Failure 400 {object} requests.failurePutObjectRequest
-// @Router / [post]
+// @Router /buckets [post]
 func (objectController *ObjectController) PutObject(c *gin.Context) {
 	form, err := c.MultipartForm()
 	if err != nil {
@@ -236,7 +236,7 @@ func (objectController *ObjectController) RemoveObjects(c *gin.Context) {
 // @Produce  json
 // @Success 200 {object} requests.successRemoveObjectRequest
 // @Failure 400 {object} requests.failureRemoveObjectRequest
-// @Router /storage/buckets/:bucket/files/:file [delete]
+// @Router /buckets/:bucket/files/:file [delete]
 func (objectController *ObjectController) RemoveObject(c *gin.Context) {
 	bucket := c.Param("bucket")
 	fileName := c.Param("file")
@@ -360,7 +360,7 @@ func (objectController *ObjectController) GetTag(c *gin.Context) {
 // @Produce  json
 // @Success 200 {object} requests.successRemoveTagRequest
 // @Failure 400 {object} requests.failureRemoveTagRequest
-// @Router /storage/buckets/:bucket/objects/:object [delete]
+// @Router /buckets/:bucket/objects/:object [delete]
 func (objectController *ObjectController) RemoveTag(c *gin.Context) {
 	bucket := c.Param("bucket")
 	file := c.Param("object")

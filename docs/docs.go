@@ -24,7 +24,34 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/": {
+        "/buckets": {
+            "get": {
+                "description": "Gets buckets data with pagination.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Bucket"
+                ],
+                "summary": "Get buckets paginated data",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/requests.successGetBucketListRequest"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/requests.failureGetBucketListRequest"
+                        }
+                    }
+                }
+            },
             "post": {
                 "description": "Adds a new object to bucket with the given details.",
                 "consumes": [
@@ -61,35 +88,6 @@ const docTemplate = `{
                         "description": "Bad Request",
                         "schema": {
                             "$ref": "#/definitions/requests.failurePutObjectRequest"
-                        }
-                    }
-                }
-            }
-        },
-        "/buckets": {
-            "get": {
-                "description": "Gets buckets data with pagination.",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Bucket"
-                ],
-                "summary": "Get buckets paginated data",
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/requests.successGetBucketListRequest"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/requests.failureGetBucketListRequest"
                         }
                     }
                 }
@@ -212,6 +210,49 @@ const docTemplate = `{
                         }
                     }
                 }
+            },
+            "delete": {
+                "description": "Delete an object with the file.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Object"
+                ],
+                "summary": "Delete object",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "bucket",
+                        "name": "bucket",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "file",
+                        "name": "file",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/requests.successRemoveObjectRequest"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/requests.failureRemoveObjectRequest"
+                        }
+                    }
+                }
             }
         },
         "/buckets/:bucket/objects": {
@@ -288,6 +329,51 @@ const docTemplate = `{
                 }
             }
         },
+        "/buckets/:bucket/objects/:object": {
+            "delete": {
+                "description": "Delete a tag with the given object.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Object"
+                ],
+                "summary": "Delete tag",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "bucket",
+                        "name": "bucket",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "object",
+                        "name": "object",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/requests.successRemoveTagRequest"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/requests.failureRemoveTagRequest"
+                        }
+                    }
+                }
+            }
+        },
         "/buckets/:bucket/tags/:tag": {
             "get": {
                 "description": "Gets tag data.",
@@ -328,96 +414,6 @@ const docTemplate = `{
                         "description": "Bad Request",
                         "schema": {
                             "$ref": "#/definitions/requests.failureGetTagRequest"
-                        }
-                    }
-                }
-            }
-        },
-        "/storage/buckets/:bucket/files/:file": {
-            "delete": {
-                "description": "Delete an object with the file.",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Object"
-                ],
-                "summary": "Delete object",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "bucket",
-                        "name": "bucket",
-                        "in": "query",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "file",
-                        "name": "file",
-                        "in": "query",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/requests.successRemoveObjectRequest"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/requests.failureRemoveObjectRequest"
-                        }
-                    }
-                }
-            }
-        },
-        "/storage/buckets/:bucket/objects/:object": {
-            "delete": {
-                "description": "Delete a tag with the given object.",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Object"
-                ],
-                "summary": "Delete tag",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "bucket",
-                        "name": "bucket",
-                        "in": "query",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "object",
-                        "name": "object",
-                        "in": "query",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/requests.successRemoveTagRequest"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/requests.failureRemoveTagRequest"
                         }
                     }
                 }
