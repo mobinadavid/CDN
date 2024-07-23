@@ -28,7 +28,7 @@ func NewObjectController(bucketService *minio.BucketService, objectService *mini
 // PutObject handles put object on bucket requests
 // @Summary Add new object to bucket
 // @Description Adds a new object to bucket with the given details.
-// @Tags CDN
+// @Tags Object
 // @Accept multipart/form-data
 // @Param files formData file true "File to upload"
 // @Param bucket formData string true "Bucket name"
@@ -114,7 +114,7 @@ func (objectController *ObjectController) PutObject(c *gin.Context) {
 // @Description Gets object data with specified filename.
 // @Param bucket query string true "bucket"
 // @Param file query string true "file"
-// @Tags CDN
+// @Tags Object
 // @Accept  json
 // @Produce  json
 // @Success 200 {object} requests.successGetObjectRequest
@@ -180,7 +180,7 @@ func (objectController *ObjectController) GetObject(c *gin.Context) {
 // @Summary Delete objects of a bucket
 // @Description Delete objects of a bucket.
 // @Param bucket query string true "bucket"
-// @Tags CDN
+// @Tags Object
 // @Accept  json
 // @Produce  json
 // @Success 200 {object} requests.successRemoveObjectsRequest
@@ -238,7 +238,7 @@ func (objectController *ObjectController) RemoveObjects(c *gin.Context) {
 // @Description Delete an object with the file.
 // @Param bucket query string true "bucket"
 // @Param file query string true "file"
-// @Tags CDN
+// @Tags Object
 // @Accept  json
 // @Produce  json
 // @Success 200 {object} requests.successRemoveObjectRequest
@@ -316,7 +316,7 @@ func (objectController *ObjectController) RemoveObject(c *gin.Context) {
 // @Description Gets tag data.
 // @Param bucket query string true "bucket"
 // @Param file query string true "file"
-// @Tags CDN
+// @Tags Object
 // @Accept  json
 // @Produce  json
 // @Success 200 {object} requests.successGetTagRequest
@@ -366,7 +366,7 @@ func (objectController *ObjectController) GetTag(c *gin.Context) {
 // @Description Delete a tag with the given object.
 // @Param bucket query string true "bucket"
 // @Param object query string true "object"
-// @Tags CDN
+// @Tags Object
 // @Accept  json
 // @Produce  json
 // @Success 200 {object} requests.successRemoveTagRequest

@@ -24,7 +24,7 @@ func NewBucketController(bucketService *minio.BucketService, objectService *mini
 // MakeBucket handles make bucket requests
 // @Summary Add new bucket
 // @Description Adds a new bucket with the given details.
-// @Tags CDN
+// @Tags Bucket
 // @Param bucket query string  true "bucket"
 // @Accept  json
 // @Produce  json
@@ -66,7 +66,7 @@ func (bucketController *BucketController) MakeBucket(c *gin.Context) {
 // @Summary Delete bucket
 // @Description Delete a bucket with the given uuid.
 // @Param bucket query string true "bucket"
-// @Tags CDN
+// @Tags Bucket
 // @Accept  json
 // @Produce  json
 // @Success 200 {object} requests.successRemoveBucketRequest
@@ -112,7 +112,7 @@ func (bucketController *BucketController) RemoveBucket(c *gin.Context) {
 // @Summary Get objects paginated data
 // @Description Gets objects data with pagination.
 // @Param bucket query string true "bucket"
-// @Tags CDN
+// @Tags Object
 // @Accept  json
 // @Produce  json
 // @Success 200 {object} requests.successGetObjectListRequest
@@ -162,7 +162,7 @@ func (bucketController *BucketController) ListObject(c *gin.Context) {
 // ListBucket handles pagination of buckets.
 // @Summary Get buckets paginated data
 // @Description Gets buckets data with pagination.
-// @Tags CDN
+// @Tags Bucket
 // @Accept  json
 // @Produce  json
 // @Success 200 {object} requests.successGetBucketListRequest
