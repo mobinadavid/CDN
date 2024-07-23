@@ -452,25 +452,7 @@ info:
   title: CDN
   version: "1.0"
 paths:
-  /storage:
-    get:
-      consumes:
-      - application/json
-      description: Gets buckets data with pagination.
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/requests.successGetBucketListRequest'
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/requests.failureGetBucketListRequest'
-      summary: Get buckets paginated data
-      tags:
-      - Bucket
+  /:
     post:
       consumes:
       - multipart/form-data
@@ -498,7 +480,26 @@ paths:
       summary: Add new object to bucket
       tags:
       - Object
-  /storage/buckets/:bucket:
+  /buckets:
+    get:
+      consumes:
+      - application/json
+      description: Gets buckets data with pagination.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/requests.successGetBucketListRequest'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/requests.failureGetBucketListRequest'
+      summary: Get buckets paginated data
+      tags:
+      - Bucket
+  /buckets/:bucket:
     delete:
       consumes:
       - application/json
@@ -547,36 +548,7 @@ paths:
       summary: Add new bucket
       tags:
       - Bucket
-  /storage/buckets/:bucket/files/:file:
-    delete:
-      consumes:
-      - application/json
-      description: Delete an object with the file.
-      parameters:
-      - description: bucket
-        in: query
-        name: bucket
-        required: true
-        type: string
-      - description: file
-        in: query
-        name: file
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/requests.successRemoveObjectRequest'
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/requests.failureRemoveObjectRequest'
-      summary: Delete object
-      tags:
-      - Object
+  /buckets/:bucket/files/:file:
     get:
       consumes:
       - application/json
@@ -606,7 +578,7 @@ paths:
       summary: Get object
       tags:
       - Object
-  /storage/buckets/:bucket/objects:
+  /buckets/:bucket/objects:
     delete:
       consumes:
       - application/json
@@ -655,6 +627,66 @@ paths:
       summary: Get objects paginated data
       tags:
       - Object
+  /buckets/:bucket/tags/:tag:
+    get:
+      consumes:
+      - application/json
+      description: Gets tag data.
+      parameters:
+      - description: bucket
+        in: query
+        name: bucket
+        required: true
+        type: string
+      - description: file
+        in: query
+        name: file
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/requests.successGetTagRequest'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/requests.failureGetTagRequest'
+      summary: Get tag
+      tags:
+      - Object
+  /storage/buckets/:bucket/files/:file:
+    delete:
+      consumes:
+      - application/json
+      description: Delete an object with the file.
+      parameters:
+      - description: bucket
+        in: query
+        name: bucket
+        required: true
+        type: string
+      - description: file
+        in: query
+        name: file
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/requests.successRemoveObjectRequest'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/requests.failureRemoveObjectRequest'
+      summary: Delete object
+      tags:
+      - Object
   /storage/buckets/:bucket/objects/:object:
     delete:
       consumes:
@@ -683,36 +715,6 @@ paths:
           schema:
             $ref: '#/definitions/requests.failureRemoveTagRequest'
       summary: Delete tag
-      tags:
-      - Object
-  /storage/buckets/:bucket/tags/:tag:
-    get:
-      consumes:
-      - application/json
-      description: Gets tag data.
-      parameters:
-      - description: bucket
-        in: query
-        name: bucket
-        required: true
-        type: string
-      - description: file
-        in: query
-        name: file
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/requests.successGetTagRequest'
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/requests.failureGetTagRequest'
-      summary: Get tag
       tags:
       - Object
 swagger: "2.0"

@@ -19,7 +19,6 @@ type ObjectController struct {
 }
 
 func NewObjectController(bucketService *minio.BucketService, objectService *minio.ObjectService) *ObjectController {
-
 	return &ObjectController{bucketService: bucketService,
 		objectService: objectService,
 	}
@@ -34,9 +33,8 @@ func NewObjectController(bucketService *minio.BucketService, objectService *mini
 // @Param bucket formData string true "Bucket name"
 // @Success 200 {object} requests.successPutObjectRequest
 // @Failure 400 {object} requests.failurePutObjectRequest
-// @Router /storage [post]
+// @Router / [post]
 func (objectController *ObjectController) PutObject(c *gin.Context) {
-
 	form, err := c.MultipartForm()
 	if err != nil {
 		response.Api(c).SetStatusCode(http.StatusUnprocessableEntity).Send()
@@ -106,7 +104,6 @@ func (objectController *ObjectController) PutObject(c *gin.Context) {
 		SetData(map[string]interface{}{
 			"objects": uploadInfoList,
 		}).Send()
-
 }
 
 // GetObject handles get data of object.
@@ -119,9 +116,8 @@ func (objectController *ObjectController) PutObject(c *gin.Context) {
 // @Produce  json
 // @Success 200 {object} requests.successGetObjectRequest
 // @Failure 400 {object} requests.failureGetObjectRequest
-// @Router /storage/buckets/:bucket/files/:file [get]
+// @Router /buckets/:bucket/files/:file [get]
 func (objectController *ObjectController) GetObject(c *gin.Context) {
-
 	var objectName string
 
 	bucket := c.Param("bucket")
@@ -173,7 +169,6 @@ func (objectController *ObjectController) GetObject(c *gin.Context) {
 		response.Api(c).SetStatusCode(http.StatusInternalServerError).Send()
 		return
 	}
-
 }
 
 // RemoveObjects handles objects remove requests
@@ -185,9 +180,8 @@ func (objectController *ObjectController) GetObject(c *gin.Context) {
 // @Produce  json
 // @Success 200 {object} requests.successRemoveObjectsRequest
 // @Failure 400 {object} requests.failureRemoveObjectsRequest
-// @Router /storage/buckets/:bucket/objects [delete]
+// @Router /buckets/:bucket/objects [delete]
 func (objectController *ObjectController) RemoveObjects(c *gin.Context) {
-
 	bucket := c.Param("bucket")
 
 	if bucket == "" {
@@ -230,7 +224,6 @@ func (objectController *ObjectController) RemoveObjects(c *gin.Context) {
 		SetData(map[string]interface{}{
 			"object's name:": objectList,
 		}).Send()
-
 }
 
 // RemoveObject handles object remove requests
@@ -245,7 +238,6 @@ func (objectController *ObjectController) RemoveObjects(c *gin.Context) {
 // @Failure 400 {object} requests.failureRemoveObjectRequest
 // @Router /storage/buckets/:bucket/files/:file [delete]
 func (objectController *ObjectController) RemoveObject(c *gin.Context) {
-
 	bucket := c.Param("bucket")
 	fileName := c.Param("file")
 
@@ -308,7 +300,6 @@ func (objectController *ObjectController) RemoveObject(c *gin.Context) {
 		SetData(map[string]interface{}{
 			"object's name:": objectList,
 		}).Send()
-
 }
 
 // GetTag handles get data of tag.
@@ -321,9 +312,8 @@ func (objectController *ObjectController) RemoveObject(c *gin.Context) {
 // @Produce  json
 // @Success 200 {object} requests.successGetTagRequest
 // @Failure 400 {object} requests.failureGetTagRequest
-// @Router /storage/buckets/:bucket/tags/:tag [get]
+// @Router /buckets/:bucket/tags/:tag [get]
 func (objectController *ObjectController) GetTag(c *gin.Context) {
-
 	bucket := c.Param("bucket")
 	tagsStr := c.Param("tag")
 
@@ -336,7 +326,7 @@ func (objectController *ObjectController) GetTag(c *gin.Context) {
 		return
 	}
 
-	exists, err := objectController.bucketService.BucketExists(context.Background(), bucket)
+	exists, err := objectController.bucketService.BucketExists(ctx, bucket)
 	if err != nil {
 		response.Api(c).SetMessage("failed to check if bucket exists.").SetStatusCode(http.StatusUnprocessableEntity).Send()
 		return
@@ -358,7 +348,6 @@ func (objectController *ObjectController) GetTag(c *gin.Context) {
 		SetData(map[string]interface{}{
 			"objects": urls,
 		}).Send()
-
 }
 
 // RemoveTag handles tag remove requests
@@ -373,7 +362,6 @@ func (objectController *ObjectController) GetTag(c *gin.Context) {
 // @Failure 400 {object} requests.failureRemoveTagRequest
 // @Router /storage/buckets/:bucket/objects/:object [delete]
 func (objectController *ObjectController) RemoveTag(c *gin.Context) {
-
 	bucket := c.Param("bucket")
 	file := c.Param("object")
 

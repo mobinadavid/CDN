@@ -12,12 +12,12 @@ func BucketRoutes(router *gin.RouterGroup) {
 	objectService := minio2.NewObjectService(minio.GetInstance().GetMinio())
 	bucketController := controllers.NewBucketController(bucketService, objectService)
 
-	storage := router.Group("storage")
+	storage := router.Group("buckets")
 	{
 		// Bucket related routes
-		storage.POST("buckets/:bucket", bucketController.MakeBucket)
-		storage.GET("buckets/:bucket/objects", bucketController.ListObject)
-		storage.DELETE("buckets/:bucket", bucketController.RemoveBucket)
+		storage.POST(":bucket", bucketController.MakeBucket)
+		storage.GET(":bucket/objects", bucketController.ListObject)
+		storage.DELETE(":bucket", bucketController.RemoveBucket)
 		storage.GET("", bucketController.ListBucket)
 
 	}

@@ -16,14 +16,14 @@ func ObjectRoutes(router *gin.RouterGroup) {
 	redisService := redis2.NewRedisService(redis.GetInstance().GetClient())
 	objectController := controllers.NewObjectController(bucketService, objectService)
 
-	storage := router.Group("storage")
+	storage := router.Group("buckets/:bucket/")
 	{
 		storage.POST("", middlewares.RateLimit(redisService), objectController.PutObject)
-		storage.GET("buckets/:bucket/files/:file", objectController.GetObject)
-		storage.DELETE("buckets/:bucket/objects", objectController.RemoveObjects)
-		storage.DELETE("buckets/:bucket/files/:file", objectController.RemoveObject)
-		storage.GET("buckets/:bucket/tags/:tag", objectController.GetTag)
-		storage.DELETE("buckets/:bucket/objects/:object", objectController.RemoveTag)
+		storage.GET("files/:file", objectController.GetObject)
+		storage.DELETE("objects", objectController.RemoveObjects)
+		storage.DELETE("files/:file", objectController.RemoveObject)
+		storage.GET("tags/:tag", objectController.GetTag)
+		storage.DELETE("objects/:object", objectController.RemoveTag)
 
 	}
 }

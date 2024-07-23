@@ -30,7 +30,7 @@ func NewBucketController(bucketService *minio.BucketService, objectService *mini
 // @Produce  json
 // @Success 200 {object} requests.successMakeBucketRequest
 // @Failure 400 {object} requests.failureMakeBucketRequest
-// @Router /storage/buckets/:bucket [post]
+// @Router /buckets/:bucket [post]
 func (bucketController *BucketController) MakeBucket(c *gin.Context) {
 
 	bucketName := c.Param("bucket")
@@ -71,7 +71,7 @@ func (bucketController *BucketController) MakeBucket(c *gin.Context) {
 // @Produce  json
 // @Success 200 {object} requests.successRemoveBucketRequest
 // @Failure 400 {object} requests.failureRemoveBucketRequest
-// @Router /storage/buckets/:bucket [delete]
+// @Router /buckets/:bucket [delete]
 func (bucketController *BucketController) RemoveBucket(c *gin.Context) {
 
 	bucketName := c.Param("bucket")
@@ -117,7 +117,7 @@ func (bucketController *BucketController) RemoveBucket(c *gin.Context) {
 // @Produce  json
 // @Success 200 {object} requests.successGetObjectListRequest
 // @Failure 400 {object} requests.failureGetObjectListRequest
-// @Router /storage/buckets/:bucket/objects [get]
+// @Router /buckets/:bucket/objects [get]
 func (bucketController *BucketController) ListObject(c *gin.Context) {
 
 	bucketName := c.Param("bucket")
@@ -167,9 +167,8 @@ func (bucketController *BucketController) ListObject(c *gin.Context) {
 // @Produce  json
 // @Success 200 {object} requests.successGetBucketListRequest
 // @Failure 400 {object} requests.failureGetBucketListRequest
-// @Router /storage [get]
+// @Router /buckets [get]
 func (bucketController *BucketController) ListBucket(c *gin.Context) {
-
 	buckets, err := bucketController.bucketService.ListBucket(context.Background())
 	if err != nil {
 		response.Api(c).SetMessage("failed to list buckets.").SetStatusCode(http.StatusInternalServerError).Send()
@@ -180,7 +179,6 @@ func (bucketController *BucketController) ListBucket(c *gin.Context) {
 		SetMessage("Bucket created successfully").
 		SetStatusCode(http.StatusOK).
 		SetData(map[string]interface{}{
-			"buckets:": buckets,
+			"buckets": buckets,
 		}).Send()
-
 }
