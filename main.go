@@ -2,6 +2,7 @@ package main
 
 import (
 	"cdn/cmd"
+	_ "cdn/docs"
 	"log"
 )
 
