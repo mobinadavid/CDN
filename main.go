@@ -17,8 +17,8 @@ import (
 // @license.name Apache 2.0
 // @license.url http://www.apache.org/licenses/LICENSE-2.0.html
 
-// @host cdn.omaxplatform.com:9541
-// @BasePath /api/v1
+// @host cdn.omaxplatform.com
+// @BasePath /app/api/v1
 func main() {
 	if err := cmd.Execute(); err != nil {
 		log.Fatalln(err)

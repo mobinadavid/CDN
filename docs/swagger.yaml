@@ -1,4 +1,4 @@
-basePath: /api/v1
+basePath: /app/api/v1
 definitions:
   requests.Bucket:
     properties:
@@ -438,7 +438,7 @@ definitions:
       status_code:
         type: integer
     type: object
-host: cdn.omaxplatform.com:9541
+host: cdn.omaxplatform.com
 info:
   contact:
     email: support@swagger.io

@@ -15,8 +15,8 @@
         },
         "version": "1.0"
     },
-    "host": "cdn.omaxplatform.com:9541",
-    "basePath": "/api/v1",
+    "host": "cdn.omaxplatform.com",
+    "basePath": "/app/api/v1",
     "paths": {
         "/buckets": {
             "get": {

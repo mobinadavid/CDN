@@ -1101,8 +1101,8 @@ const docTemplate = `{
 // SwaggerInfo holds exported Swagger Info so clients can modify it
 var SwaggerInfo = &swag.Spec{
 	Version:          "1.0",
-	Host:             "cdn.omaxplatform.com:9541",
-	BasePath:         "/api/v1",
+	Host:             "cdn.omaxplatform.com",
+	BasePath:         "/app/api/v1",
 	Schemes:          []string{},
 	Title:            "CDN",
 	Description:      "This is a swagger server for documentation of cdn app.",
