@@ -1,4 +1,4 @@
-FROM golang:alpine AS builder
+FROM docker-repo.omaxplatform.com/golang:alpine AS builder
 LABEL maintainer="Ali Khedmati"
 ENV CGO_ENABLED 0 \
     GOPATH /go \
