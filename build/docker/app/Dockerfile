@@ -5,11 +5,11 @@ ENV CGO_ENABLED 0 \
     GOCACHE /go-build \
     GOOS linux \
     GOARCH=amd64 \
-    GO111MODULE=on \
-    GOPROXY=http://nexus-repo.omaxplatform.com/repository/go-proxy,direct
+    GO111MODULE=on 
 WORKDIR /cdn-app
 COPY . /cdn-app
 # Install Dependencies
+ENV GOPROXY=http://nexus-repo.omaxplatform.com/repository/go-proxy,direct
 RUN go env GOPROXY
 RUN --mount=type=cache,target=/go/pkg/mod/cache \
     --mount=type=cache,target=/go-build \
