@@ -10,6 +10,7 @@ ENV CGO_ENABLED 0 \
 WORKDIR /cdn-app
 COPY . /cdn-app
 # Install Dependencies
+RUN go env GOPROXY
 RUN --mount=type=cache,target=/go/pkg/mod/cache \
     --mount=type=cache,target=/go-build \
     go mod download
