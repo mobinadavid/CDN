@@ -21,7 +21,7 @@ services:
       - cdn
   # Minio
   minio:
-    image: minio/minio:latest
+    image: docker-repo.omaxplatform.com/minio/minio:latest
     container_name: minio.$APP_HOST
     restart: unless-stopped
     ports:
