@@ -11,9 +11,9 @@ COPY . /cdn-app
 # Install Dependencies
 ENV GOPROXY=http://nexus-repo.omaxplatform.com/repository/go-proxy,direct
 RUN go env GOPROXY
-RUN --mount=type=cache,target=/go/pkg/mod/cache \
-    --mount=type=cache,target=/go-build \
-    go mod download
+#RUN --mount=type=cache,target=/go/pkg/mod/cache \
+#    --mount=type=cache,target=/go-build \
+RUN go mod download
 
 # Build the binary
 RUN --mount=type=cache,target=/go/pkg/mod/cache \
