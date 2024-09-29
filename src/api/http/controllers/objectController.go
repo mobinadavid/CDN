@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"cdn/src/api/http/response"
+	i18n "cdn/src/pkg/i18h"
 	"cdn/src/pkg/utils"
 	"cdn/src/service/minio"
 	"context"
@@ -40,7 +41,6 @@ func (objectController *ObjectController) PutObject(c *gin.Context) {
 		response.Api(c).SetStatusCode(http.StatusUnprocessableEntity).Send()
 		return
 	}
-
 	bucket := c.PostForm("bucket")
 	folder := c.PostForm("folder")
 	tagsStr := c.PostForm("tag")
@@ -52,12 +52,10 @@ func (objectController *ObjectController) PutObject(c *gin.Context) {
 	}
 
 	exists, err := objectController.bucketService.BucketExists(context.Background(), bucket)
-
 	if err != nil {
 		response.Api(c).SetMessage("failed to check if bucket exists.").SetStatusCode(http.StatusUnprocessableEntity).Send()
 		return
 	}
-
 	if !exists {
 		response.Api(c).SetMessage("The specified bucket does not exist.").SetStatusCode(http.StatusUnprocessableEntity).Send()
 		return
@@ -219,10 +217,10 @@ func (objectController *ObjectController) RemoveObjects(c *gin.Context) {
 	}
 
 	response.Api(c).
-		SetMessage("all removed successfully").
+		SetMessage(i18n.Localize(c.GetString("locale"), "request-successful")).
 		SetStatusCode(http.StatusOK).
 		SetData(map[string]interface{}{
-			"object's name": objectList,
+			"objects": objectList,
 		}).Send()
 }
 
@@ -295,10 +293,10 @@ func (objectController *ObjectController) RemoveObject(c *gin.Context) {
 	}
 
 	response.Api(c).
-		SetMessage("removed successfully").
+		SetMessage(i18n.Localize(c.GetString("locale"), "request-successful")).
 		SetStatusCode(http.StatusOK).
 		SetData(map[string]interface{}{
-			"object's name": objectList,
+			"objects": objectList,
 		}).Send()
 }
 
@@ -343,7 +341,7 @@ func (objectController *ObjectController) GetTag(c *gin.Context) {
 	}
 
 	response.Api(c).
-		SetMessage("urls retrieved successfully").
+		SetMessage(i18n.Localize(c.GetString("locale"), "request-successful")).
 		SetStatusCode(http.StatusOK).
 		SetData(map[string]interface{}{
 			"objects": urls,
@@ -398,6 +396,6 @@ func (objectController *ObjectController) RemoveTag(c *gin.Context) {
 	}
 
 	response.Api(c).
-		SetMessage("removed successfully").
+		SetMessage(i18n.Localize(c.GetString("locale"), "request-successful")).
 		SetStatusCode(http.StatusOK).Send()
 }
