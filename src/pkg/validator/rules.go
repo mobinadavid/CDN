@@ -1,11 +1,11 @@
 package validator
 
 import (
+	"cdn/src/pkg/i18h"
 	"fmt"
 	ut "github.com/go-playground/universal-translator"
 	"github.com/go-playground/validator/v10"
 	"github.com/google/uuid"
-	"ticket/src/pkg/i18h"
 )
 
 func RegisterRules(val *validator.Validate, trans *ut.UniversalTranslator) {
