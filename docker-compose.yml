@@ -25,17 +25,17 @@ services:
     container_name: minio.$APP_HOST
     restart: unless-stopped
     ports:
-      - "9000:9000"
+      - ${MINIO_PORT}:${MINIO_PORT}
     command: server --certs-dir /etc/minio/certs --console-address :9001 /data
     tty: true
     environment:
-      MINIO_SERVER_URL: "https://minio.$APP_HOST:9000"
+      MINIO_SERVER_URL: "https://minio.$APP_HOST:${MINIO_PORT}"
       MINIO_BROWSER_REDIRECT_URL: "https://$APP_HOST/dashboard"
       MINIO_ROOT_USER: ${MINIO_ROOT_USER:-root}
       MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:-myawesomepassword}
       TZ: ${APP_TZ}
     healthcheck:
-      test: ["CMD-SHELL", "mc alias set minio https://minio.$APP_HOST:9000 ${MINIO_ROOT_USER} ${MINIO_ROOT_PASSWORD} && mc admin info minio"]
+      test: ["CMD-SHELL", "mc alias set minio https://minio.$APP_HOST:${MINIO_PORT} ${MINIO_ROOT_USER} ${MINIO_ROOT_PASSWORD} && mc admin info minio"]
       interval: 5s
       timeout: 5s
       retries: 5
@@ -46,7 +46,7 @@ services:
       - cdn
   # Nginx
   nginx:
-    image: nginx:stable-alpine
+    image: docker-repo.omaxplatform.com/nginx:stable-alpine
     container_name: nginx.$APP_HOST
     restart: unless-stopped
     environment:
@@ -67,9 +67,9 @@ services:
       - cdn
   # Redis
   redis:
-    image: redis:alpine
+    image: docker-repo.omaxplatform.com/redis:alpine
     ports:
-      - "6379:6379"
+      - ${REDIS_PORT:-6379}:6379
     container_name: redis.${APP_HOST}
     restart: unless-stopped
     command: redis-server /usr/local/etc/redis/redis.conf --requirepass ${REDIS_PASSWORD}
