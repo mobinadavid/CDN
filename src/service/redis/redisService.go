@@ -1,10 +1,12 @@
 package redis
 
 import (
+	"cdn/src/config"
 	"context"
 	"crypto/sha1"
 	"fmt"
 	"github.com/redis/go-redis/v9"
+	"strconv"
 	"time"
 )
 
@@ -18,7 +20,6 @@ func NewRedisService(redisClient *redis.Client) *RedisService {
 }
 
 func (redisService *RedisService) GenerateCompositeKey(ip, userAgent string) string {
-
 	compositeKey := fmt.Sprintf("%s:%s", ip, userAgent)
 	hasher := sha1.New()
 	hasher.Write([]byte(compositeKey))
@@ -28,10 +29,15 @@ func (redisService *RedisService) GenerateCompositeKey(ip, userAgent string) str
 }
 
 func (redisService *RedisService) CheckAndIncrementRateLimit(ip, userAgent string) (bool, error) {
-
+	configs := config.GetInstance()
 	ctx := context.Background()
 	compositeKey := redisService.GenerateCompositeKey(ip, userAgent)
 
+	rateLimitStr := configs.Get("RATE_LIMIT")
+	rateLimit, err := strconv.Atoi(rateLimitStr)
+	if err != nil {
+		return false, err // Handle conversion error
+	}
 	// Get the current count of objects put by the composite key
 	count, err := redisService.RedisClient.Get(ctx, compositeKey).Int()
 	if err != nil && err != redis.Nil {
@@ -42,9 +48,9 @@ func (redisService *RedisService) CheckAndIncrementRateLimit(ip, userAgent strin
 	if err == redis.Nil {
 		count = 0
 	}
-
-	// If count exceeds the limit (10 in this case), reject the request
-	if count >= 10 {
+	fmt.Println("")
+	// If count exceeds the limit, reject the request
+	if count >= rateLimit {
 		return false, nil
 	}
 
