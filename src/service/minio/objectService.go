@@ -16,9 +16,9 @@ type ObjectService struct {
 	BucketService *BucketService
 }
 
-func NewObjectService(minioClient *minio.Client, bucketService BucketService) *ObjectService {
+func NewObjectService(minioClient *minio.Client, bucketService *BucketService) *ObjectService {
 	return &ObjectService{MinioClient: minioClient,
-		BucketService: &bucketService}
+		BucketService: bucketService}
 }
 
 func (objectService *ObjectService) PutObject(ctx context.Context, bucket string, files []*multipart.FileHeader, folder string, tags ...map[string]string) ([]map[string]string, error) {

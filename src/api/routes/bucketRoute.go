@@ -9,7 +9,7 @@ import (
 
 func BucketRoutes(router *gin.RouterGroup) {
 	bucketService := minio2.NewBucketService(minio.GetInstance().GetMinio())
-	objectService := minio2.NewObjectService(minio.GetInstance().GetMinio())
+	objectService := minio2.NewObjectService(minio.GetInstance().GetMinio(), bucketService)
 	bucketController := controllers.NewBucketController(bucketService, objectService)
 
 	storage := router.Group("buckets")
