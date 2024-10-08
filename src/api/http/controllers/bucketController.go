@@ -35,22 +35,9 @@ func NewBucketController(bucketService *minio.BucketService, objectService *mini
 func (bucketController *BucketController) MakeBucket(c *gin.Context) {
 	bucketName := c.Param("bucket")
 
-	if bucketName == "" {
-		response.Api(c).SetMessage("bucketName or region is missing.").SetStatusCode(http.StatusUnprocessableEntity).Send()
-		return
-	}
-
-	exists, err := bucketController.bucketService.BucketExists(context.Background(), bucketName)
-	if exists || err != nil {
-		response.Api(c).SetMessage("The specified bucket already exists.").SetStatusCode(http.StatusNotFound).Send()
-		return
-	}
-
-	err = bucketController.bucketService.MakeBucket(context.Background(), bucketName, minio2.MakeBucketOptions{})
+	err := bucketController.bucketService.MakeBucket(context.Background(), bucketName, minio2.MakeBucketOptions{})
 	if err != nil {
-		response.Api(c).SetMessage("failed to create bucket.").SetStatusCode(http.StatusInternalServerError).Send()
-
-		return
+		response.Api(c).SetMessage(err.Error()).SetStatusCode(http.StatusInternalServerError).Send()
 	}
 
 	// Return response.
