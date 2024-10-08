@@ -50,6 +50,9 @@ func getNewRouter() *gin.Engine {
 	// Attach request id middleware.
 	router.Use(middlewares.RequestID)
 
+	// Attach i18n middleware.
+	router.Use(middlewares.I18n)
+
 	// Zap logger
 	router.Use(middlewares.ZapLogger)
 

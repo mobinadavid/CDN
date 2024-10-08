@@ -3,6 +3,7 @@ package controllers
 import (
 	_ "cdn/src/api/http/requests"
 	"cdn/src/api/http/response"
+	"cdn/src/pkg/i18n"
 	"cdn/src/service/minio"
 	"context"
 	"github.com/gin-gonic/gin"
@@ -32,7 +33,6 @@ func NewBucketController(bucketService *minio.BucketService, objectService *mini
 // @Failure 400 {object} requests.failureMakeBucketRequest
 // @Router /buckets/:bucket [post]
 func (bucketController *BucketController) MakeBucket(c *gin.Context) {
-
 	bucketName := c.Param("bucket")
 
 	if bucketName == "" {
@@ -53,13 +53,14 @@ func (bucketController *BucketController) MakeBucket(c *gin.Context) {
 		return
 	}
 
+	// Return response.
 	response.Api(c).
-		SetMessage("Bucket created successfully").
+		SetMessage(i18n.Localize(c.GetString("locale"), "request-successful")).
 		SetStatusCode(http.StatusOK).
 		SetData(map[string]interface{}{
 			"bucket": bucketName,
-		}).Send()
-
+		}).
+		Send()
 }
 
 // RemoveBucket handles bucket remove requests
@@ -73,39 +74,22 @@ func (bucketController *BucketController) MakeBucket(c *gin.Context) {
 // @Failure 400 {object} requests.failureRemoveBucketRequest
 // @Router /buckets/:bucket [delete]
 func (bucketController *BucketController) RemoveBucket(c *gin.Context) {
-
 	bucketName := c.Param("bucket")
 
-	exists, err := bucketController.bucketService.BucketExists(context.Background(), bucketName)
+	err := bucketController.bucketService.RemoveBucket(c, bucketName)
 	if err != nil {
-		response.Api(c).SetMessage("failed to check if bucket exists.").SetStatusCode(http.StatusUnprocessableEntity).Send()
-		return
-	}
-	if !exists {
-		response.Api(c).SetMessage("The specified bucket does not exist.").SetStatusCode(http.StatusUnprocessableEntity).Send()
+		response.Api(c).SetMessage(err.Error()).SetStatusCode(http.StatusInternalServerError).Send()
 		return
 	}
 
-	// check if bucket is empty or not
-	objects, err := bucketController.bucketService.ListObjects(context.Background(), bucketName, minio2.ListObjectsOptions{})
-	if len(objects) != 0 {
-		response.Api(c).SetMessage("The bucket is not empty.").SetStatusCode(http.StatusUnprocessableEntity).Send()
-		return
-	}
-
-	err = bucketController.bucketService.RemoveBucket(context.Background(), bucketName)
-	if err != nil {
-		response.Api(c).SetMessage("failed to remove bucket.").SetStatusCode(http.StatusInternalServerError).Send()
-		return
-	}
-
+	// Return response.
 	response.Api(c).
-		SetMessage("Bucket is removed successfully").
+		SetMessage(i18n.Localize(c.GetString("locale"), "request-successful")).
 		SetStatusCode(http.StatusOK).
 		SetData(map[string]interface{}{
 			"bucket": bucketName,
-		}).Send()
-
+		}).
+		Send()
 }
 
 // ListObject handles pagination of objects.
@@ -119,26 +103,13 @@ func (bucketController *BucketController) RemoveBucket(c *gin.Context) {
 // @Failure 400 {object} requests.failureGetObjectListRequest
 // @Router /buckets/:bucket/objects [get]
 func (bucketController *BucketController) ListObject(c *gin.Context) {
-
 	bucketName := c.Param("bucket")
-
-	exists, err := bucketController.bucketService.BucketExists(context.Background(), bucketName)
-	if err != nil {
-		response.Api(c).SetMessage("failed to check if bucket exists.").SetStatusCode(http.StatusUnprocessableEntity).Send()
-		return
-	}
-
-	if !exists {
-		response.Api(c).SetMessage("The specified bucket does not exist.").SetStatusCode(http.StatusUnprocessableEntity).Send()
-		return
-	}
 
 	objects, err := bucketController.bucketService.ListObjects(c, bucketName, minio2.ListObjectsOptions{
 		Recursive: true,
 	})
-
 	if err != nil {
-		response.Api(c).SetMessage("failed to list objects.").SetStatusCode(http.StatusInternalServerError).Send()
+		response.Api(c).SetMessage(err.Error()).SetStatusCode(http.StatusInternalServerError).Send()
 		return
 	}
 
@@ -150,13 +121,12 @@ func (bucketController *BucketController) ListObject(c *gin.Context) {
 	}
 
 	response.Api(c).
-		SetMessage("listed successfully").
+		SetMessage(i18n.Localize(c.GetString("locale"), "request-successful")).
 		SetStatusCode(http.StatusOK).
 		SetData(map[string]interface{}{
 			"number of objects": len(objectList),
 			"objects":           objectList,
 		}).Send()
-
 }
 
 // ListBucket handles pagination of buckets.
@@ -169,14 +139,14 @@ func (bucketController *BucketController) ListObject(c *gin.Context) {
 // @Failure 400 {object} requests.failureGetBucketListRequest
 // @Router /buckets [get]
 func (bucketController *BucketController) ListBucket(c *gin.Context) {
-	buckets, err := bucketController.bucketService.ListBucket(context.Background())
+	buckets, err := bucketController.bucketService.ListBucket(c)
 	if err != nil {
-		response.Api(c).SetMessage("failed to list buckets.").SetStatusCode(http.StatusInternalServerError).Send()
+		response.Api(c).SetMessage(err.Error()).SetStatusCode(http.StatusInternalServerError).Send()
 		return
 	}
 
 	response.Api(c).
-		SetMessage("Listed successfully").
+		SetMessage(i18n.Localize(c.GetString("locale"), "request-successful")).
 		SetStatusCode(http.StatusOK).
 		SetData(map[string]interface{}{
 			"buckets": buckets,
