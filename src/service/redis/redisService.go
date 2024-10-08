@@ -34,9 +34,24 @@ func (redisService *RedisService) CheckAndIncrementRateLimit(ip, userAgent strin
 	compositeKey := redisService.GenerateCompositeKey(ip, userAgent)
 
 	rateLimitStr := configs.Get("RATE_LIMIT")
+	periodStr := configs.Get("RATE_LIMITER_PERIOD_PER_SECOND")
+	if rateLimitStr == "" {
+		rateLimitStr = "10"
+		configs.Set("RATE_LIMIT", "10")
+
+	}
+	if periodStr == "" {
+		periodStr = "60"
+		configs.Set("RATE_LIMITER_PERIOD_PER_SECOND", "60")
+
+	}
 	rateLimit, err := strconv.Atoi(rateLimitStr)
 	if err != nil {
-		return false, err // Handle conversion error
+		return false, err
+	}
+	period, err := strconv.Atoi(rateLimitStr)
+	if err != nil {
+		return false, err
 	}
 	// Get the current count of objects put by the composite key
 	count, err := redisService.RedisClient.Get(ctx, compositeKey).Int()
@@ -48,7 +63,6 @@ func (redisService *RedisService) CheckAndIncrementRateLimit(ip, userAgent strin
 	if err == redis.Nil {
 		count = 0
 	}
-	fmt.Println("")
 	// If count exceeds the limit, reject the request
 	if count >= rateLimit {
 		return false, nil
@@ -62,7 +76,7 @@ func (redisService *RedisService) CheckAndIncrementRateLimit(ip, userAgent strin
 
 	// Set the expiration time for the key to one hour if it doesn't exist
 	if count == 0 {
-		err = redisService.RedisClient.Expire(ctx, compositeKey, time.Hour).Err()
+		err = redisService.RedisClient.Expire(ctx, compositeKey, time.Duration(period)*time.Second).Err()
 		if err != nil {
 			return false, err
 		}

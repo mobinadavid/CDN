@@ -17,13 +17,14 @@ func RateLimit(redisService *redis.RedisService) gin.HandlerFunc {
 		// Check rate limit
 		allowed, err := redisService.CheckAndIncrementRateLimit(ip, userAgent)
 		if err != nil {
-			response.Api(c).SetMessage("Failed to check rate limit ").SetStatusCode(http.StatusInternalServerError).Send()
+			response.Api(c).SetMessage(err.Error()).SetStatusCode(http.StatusInternalServerError).Send()
 			c.Abort()
 			return
 		}
 		rateLimitStr := configs.Get("RATE_LIMIT")
+		periodStr := configs.Get("RATE_LIMITER_PERIOD_PER_SECOND")
 		if !allowed {
-			response.Api(c).SetMessage("You can't put more than " + rateLimitStr + " Objects in one hour").SetStatusCode(http.StatusTooManyRequests).Send()
+			response.Api(c).SetMessage("You can't put more than " + rateLimitStr + " Objects in " + periodStr + " seconds").SetStatusCode(http.StatusTooManyRequests).Send()
 			c.Abort()
 			return
 		}
