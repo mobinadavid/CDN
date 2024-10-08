@@ -51,6 +51,9 @@ func (bucketService *BucketService) BucketExists(ctx context.Context, bucket str
 }
 
 func (bucketService *BucketService) ListObjects(ctx context.Context, bucketName string, options minio.ListObjectsOptions) ([]minio.ObjectInfo, error) {
+	if bucketName == "" {
+		return nil, errors.New("empty bucket name")
+	}
 	exists, err := bucketService.BucketExists(context.Background(), bucketName)
 	if err != nil {
 		return nil, err

@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"cdn/src/api/http/response"
+	"cdn/src/pkg/i18n"
 	"cdn/src/pkg/utils"
 	"cdn/src/service/minio"
 	"context"
@@ -45,24 +46,6 @@ func (objectController *ObjectController) PutObject(c *gin.Context) {
 	folder := c.PostForm("folder")
 	tagsStr := c.PostForm("tag")
 
-	if bucket == "" {
-		response.Api(c).SetMessage("bucket is required.").SetStatusCode(http.StatusUnprocessableEntity).Send()
-		return
-
-	}
-
-	exists, err := objectController.bucketService.BucketExists(context.Background(), bucket)
-
-	if err != nil {
-		response.Api(c).SetMessage("failed to check if bucket exists.").SetStatusCode(http.StatusUnprocessableEntity).Send()
-		return
-	}
-
-	if !exists {
-		response.Api(c).SetMessage("The specified bucket does not exist.").SetStatusCode(http.StatusUnprocessableEntity).Send()
-		return
-	}
-
 	if err := utils.ValidateFiles(form.File["files[]"]); err != nil {
 		response.Api(c).SetMessage(err.Error()).SetStatusCode(http.StatusUnprocessableEntity).Send()
 		return
@@ -98,12 +81,14 @@ func (objectController *ObjectController) PutObject(c *gin.Context) {
 		return
 	}
 
+	// Return response.
 	response.Api(c).
-		SetMessage("Files uploaded successfully").
+		SetMessage(i18n.Localize(c.GetString("locale"), "request-successful")).
 		SetStatusCode(http.StatusOK).
 		SetData(map[string]interface{}{
 			"objects": uploadInfoList,
-		}).Send()
+		}).
+		Send()
 }
 
 // GetObject handles get data of object.
@@ -118,34 +103,10 @@ func (objectController *ObjectController) PutObject(c *gin.Context) {
 // @Failure 400 {object} requests.failureGetObjectRequest
 // @Router /buckets/:bucket/files/:file [get]
 func (objectController *ObjectController) GetObject(c *gin.Context) {
-	var objectName string
-
 	bucket := c.Param("bucket")
 	fileName := c.Param("file")
 
-	if bucket == "" || fileName == "" {
-		response.Api(c).SetMessage("bucket or file is missing.").SetStatusCode(http.StatusUnprocessableEntity).Send()
-		return
-	}
-
-	exists, err := objectController.bucketService.BucketExists(context.Background(), bucket)
-	if err != nil {
-		response.Api(c).SetMessage("failed to check if bucket exists.").SetStatusCode(http.StatusUnprocessableEntity).Send()
-		return
-	}
-	if !exists {
-		response.Api(c).SetMessage("The specified bucket does not exist.").SetStatusCode(http.StatusUnprocessableEntity).Send()
-		return
-	}
-
-	if strings.Contains(fileName, "_") {
-		folders := strings.Split(fileName, "_")
-		objectName = folders[0] + "/" + folders[1]
-	} else {
-		objectName = fileName
-	}
-
-	file, err := objectController.objectService.GetObject(context.Background(), bucket, objectName, minio2.GetObjectOptions{})
+	file, err := objectController.objectService.GetObject(c, bucket, fileName, minio2.GetObjectOptions{})
 	if err != nil {
 		response.Api(c).SetStatusCode(http.StatusNotFound).Send()
 		return
@@ -184,25 +145,12 @@ func (objectController *ObjectController) GetObject(c *gin.Context) {
 func (objectController *ObjectController) RemoveObjects(c *gin.Context) {
 	bucket := c.Param("bucket")
 
-	if bucket == "" {
-		response.Api(c).SetMessage("bucket is missing.").SetStatusCode(http.StatusUnprocessableEntity).Send()
-		return
-	}
-
-	exists, err := objectController.bucketService.BucketExists(context.Background(), bucket)
-	if err != nil {
-		response.Api(c).SetMessage("failed to check if bucket exists.").SetStatusCode(http.StatusUnprocessableEntity).Send()
-		return
-	}
-	if !exists {
-		response.Api(c).SetMessage("The specified bucket does not exist.").SetStatusCode(http.StatusUnprocessableEntity).Send()
-		return
-	}
-
 	objects, err := objectController.bucketService.ListObjects(context.Background(), bucket, minio2.ListObjectsOptions{
 		Recursive: true,
 	})
-
+	if err != nil {
+		response.Api(c).SetStatusCode(http.StatusInternalServerError).Send()
+	}
 	// Collect object names
 	objectList := make([]string, 0, len(objects))
 	for _, object := range objects {
@@ -213,17 +161,19 @@ func (objectController *ObjectController) RemoveObjects(c *gin.Context) {
 	for _, objectName := range objectList {
 		errCh := objectController.objectService.RemoveObjects(context.Background(), bucket, objectName, minio2.RemoveObjectOptions{})
 		if errCh != nil {
-			response.Api(c).SetMessage("failed to remove objects.").SetStatusCode(http.StatusInternalServerError).Send()
+			response.Api(c).SetMessage(errCh.Error()).SetStatusCode(http.StatusInternalServerError).Send()
 			return
 		}
 	}
 
+	// Return response.
 	response.Api(c).
-		SetMessage("all removed successfully").
+		SetMessage(i18n.Localize(c.GetString("locale"), "request-successful")).
 		SetStatusCode(http.StatusOK).
 		SetData(map[string]interface{}{
-			"object's name": objectList,
-		}).Send()
+			"objects": objectList,
+		}).
+		Send()
 }
 
 // RemoveObject handles object remove requests
@@ -241,25 +191,17 @@ func (objectController *ObjectController) RemoveObject(c *gin.Context) {
 	bucket := c.Param("bucket")
 	fileName := c.Param("file")
 
-	if bucket == "" || fileName == "" {
-		response.Api(c).SetMessage("bucket or file is missing.").SetStatusCode(http.StatusUnprocessableEntity).Send()
+	if fileName == "" {
+		response.Api(c).SetMessage("file is missing.").SetStatusCode(http.StatusUnprocessableEntity).Send()
 		return
 	}
 
-	exists, err := objectController.bucketService.BucketExists(context.Background(), bucket)
-	if err != nil {
-		response.Api(c).SetMessage("failed to check if bucket exists.").SetStatusCode(http.StatusUnprocessableEntity).Send()
-		return
-	}
-	if !exists {
-		response.Api(c).SetMessage("The specified bucket does not exist.").SetStatusCode(http.StatusUnprocessableEntity).Send()
-		return
-	}
-
-	objects, err := objectController.bucketService.ListObjects(context.Background(), bucket, minio2.ListObjectsOptions{
+	objects, err := objectController.bucketService.ListObjects(c, bucket, minio2.ListObjectsOptions{
 		Recursive: true,
 	})
-
+	if err != nil {
+		response.Api(c).SetMessage(err.Error()).SetStatusCode(http.StatusInternalServerError).Send()
+	}
 	// Collect object names
 	existingObjectList := make([]string, 0, len(objects))
 	for _, object := range objects {
@@ -267,7 +209,6 @@ func (objectController *ObjectController) RemoveObject(c *gin.Context) {
 	}
 
 	objectList := make([]string, 0)
-
 	for _, objectName := range strings.Split(fileName, ",") {
 		if strings.Contains(objectName, "_") {
 			splitString := strings.Split(objectName, "_")
@@ -276,30 +217,24 @@ func (objectController *ObjectController) RemoveObject(c *gin.Context) {
 		objectList = append(objectList, objectName)
 	}
 
-	exist := objectController.objectService.ObjectExists(existingObjectList, objectList)
-	if exist == false {
-		response.Api(c).SetMessage("failed to find objects.").SetStatusCode(http.StatusInternalServerError).Send()
-		return
-	}
-
 	// Delete the objects
 	for _, objectName := range objectList {
-
-		errCh := objectController.objectService.RemoveObjects(context.Background(), bucket, objectName, minio2.RemoveObjectOptions{})
-
+		errCh := objectController.objectService.RemoveObjects(c, bucket, objectName, minio2.RemoveObjectOptions{})
 		if errCh != nil {
-			response.Api(c).SetMessage("failed to remove objects.").SetStatusCode(http.StatusInternalServerError).Send()
+			response.Api(c).SetMessage(errCh.Error()).SetStatusCode(http.StatusInternalServerError).Send()
 			return
 		}
 
 	}
 
+	// Return response.
 	response.Api(c).
-		SetMessage("removed successfully").
+		SetMessage(i18n.Localize(c.GetString("locale"), "request-successful")).
 		SetStatusCode(http.StatusOK).
 		SetData(map[string]interface{}{
-			"object's name": objectList,
-		}).Send()
+			"objects": objectList,
+		}).
+		Send()
 }
 
 // GetTag handles get data of tag.
@@ -321,33 +256,20 @@ func (objectController *ObjectController) GetTag(c *gin.Context) {
 	ctx = context.WithValue(ctx, "Host", c.Request.Host)
 	ctx = context.WithValue(ctx, "Scheme", c.GetHeader("Scheme"))
 
-	if bucket == "" {
-		response.Api(c).SetMessage("bucket is missing.").SetStatusCode(http.StatusUnprocessableEntity).Send()
-		return
-	}
-
-	exists, err := objectController.bucketService.BucketExists(ctx, bucket)
-	if err != nil {
-		response.Api(c).SetMessage("failed to check if bucket exists.").SetStatusCode(http.StatusUnprocessableEntity).Send()
-		return
-	}
-	if !exists {
-		response.Api(c).SetMessage("The specified bucket does not exist.").SetStatusCode(http.StatusUnprocessableEntity).Send()
-		return
-	}
-
 	urls, err := objectController.objectService.GetTag(ctx, bucket, tagsStr)
 	if err != nil {
-		response.Api(c).SetMessage("Failed to get objects by tags.").SetStatusCode(http.StatusInternalServerError).Send()
+		response.Api(c).SetMessage(err.Error()).SetStatusCode(http.StatusInternalServerError).Send()
 		return
 	}
 
+	// Return response.
 	response.Api(c).
-		SetMessage("urls retrieved successfully").
+		SetMessage(i18n.Localize(c.GetString("locale"), "request-successful")).
 		SetStatusCode(http.StatusOK).
 		SetData(map[string]interface{}{
 			"objects": urls,
-		}).Send()
+		}).
+		Send()
 }
 
 // RemoveTag handles tag remove requests
@@ -372,7 +294,7 @@ func (objectController *ObjectController) RemoveTag(c *gin.Context) {
 
 	exists, err := objectController.bucketService.BucketExists(context.Background(), bucket)
 	if err != nil {
-		response.Api(c).SetMessage("failed to check if bucket exists.").SetStatusCode(http.StatusUnprocessableEntity).Send()
+		response.Api(c).SetMessage(err.Error()).SetStatusCode(http.StatusUnprocessableEntity).Send()
 		return
 	}
 	if !exists {
@@ -387,17 +309,18 @@ func (objectController *ObjectController) RemoveTag(c *gin.Context) {
 
 	err = objectController.objectService.GetObjectTagging(context.Background(), bucket, file, minio2.GetObjectTaggingOptions{})
 	if err != nil {
-		response.Api(c).SetMessage("object doesnt have any tag").SetStatusCode(http.StatusInternalServerError).Send()
+		response.Api(c).SetMessage(err.Error()).SetStatusCode(http.StatusInternalServerError).Send()
 		return
 	}
 
 	err = objectController.objectService.RemoveObjectTagging(context.Background(), bucket, file, minio2.RemoveObjectTaggingOptions{})
 	if err != nil {
-		response.Api(c).SetMessage("can't remove the tag").SetStatusCode(http.StatusUnprocessableEntity).Send()
+		response.Api(c).SetMessage(err.Error()).SetStatusCode(http.StatusUnprocessableEntity).Send()
 		return
 	}
 
 	response.Api(c).
-		SetMessage("removed successfully").
-		SetStatusCode(http.StatusOK).Send()
+		SetMessage(i18n.Localize(c.GetString("locale"), "request-successful")).
+		SetStatusCode(http.StatusOK).
+		Send()
 }

@@ -3,6 +3,7 @@ package minio
 import (
 	"cdn/src/pkg/utils"
 	"context"
+	"errors"
 	"fmt"
 	"github.com/minio/minio-go/v7"
 	"mime/multipart"
@@ -11,14 +12,29 @@ import (
 )
 
 type ObjectService struct {
-	MinioClient *minio.Client
+	MinioClient   *minio.Client
+	BucketService *BucketService
 }
 
-func NewObjectService(minioClient *minio.Client) *ObjectService {
-	return &ObjectService{MinioClient: minioClient}
+func NewObjectService(minioClient *minio.Client, bucketService BucketService) *ObjectService {
+	return &ObjectService{MinioClient: minioClient,
+		BucketService: &bucketService}
 }
 
 func (objectService *ObjectService) PutObject(ctx context.Context, bucket string, files []*multipart.FileHeader, folder string, tags ...map[string]string) ([]map[string]string, error) {
+	if bucket == "" {
+		return nil, errors.New("bucket can't be empty")
+
+	}
+
+	exists, err := objectService.BucketService.BucketExists(context.Background(), bucket)
+	if err != nil {
+		return nil, err
+	}
+
+	if !exists {
+		return nil, errors.New("bucket doesn't exist")
+	}
 
 	var uploadInfoList []map[string]string
 	var uuidFileName string
@@ -74,7 +90,26 @@ func (objectService *ObjectService) PutObject(ctx context.Context, bucket string
 }
 
 func (objectService *ObjectService) GetObject(ctx context.Context, bucket, fileName string, options minio.GetObjectOptions) (*minio.Object, error) {
-	return objectService.MinioClient.GetObject(ctx, bucket, fileName, options)
+	var objectName string
+	if bucket == "" || fileName == "" {
+		return nil, errors.New("bucket or file name can't be empty")
+	}
+
+	exists, err := objectService.BucketService.BucketExists(context.Background(), bucket)
+	if err != nil {
+		return nil, err
+	}
+	if !exists {
+		return nil, errors.New("bucket doesn't exist")
+	}
+
+	if strings.Contains(fileName, "_") {
+		folders := strings.Split(fileName, "_")
+		objectName = folders[0] + "/" + folders[1]
+	} else {
+		objectName = fileName
+	}
+	return objectService.MinioClient.GetObject(ctx, bucket, objectName, options)
 }
 
 func (objectService *ObjectService) RemoveObjects(ctx context.Context, bucketName, objectName string, options minio.RemoveObjectOptions) error {
@@ -83,7 +118,17 @@ func (objectService *ObjectService) RemoveObjects(ctx context.Context, bucketNam
 }
 
 func (objectService *ObjectService) GetTag(ctx context.Context, bucket string, tagStr string) ([]map[string]string, error) {
+	if bucket == "" {
+		return nil, errors.New("bucket can't be empty")
+	}
 
+	exists, err := objectService.BucketService.BucketExists(ctx, bucket)
+	if err != nil {
+		return nil, err
+	}
+	if !exists {
+		return nil, errors.New("bucket doesn't exist")
+	}
 	var uploadInfoList []map[string]string
 	var existingTag = make(map[string]string)
 
