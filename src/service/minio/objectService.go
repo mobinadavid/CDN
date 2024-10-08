@@ -27,7 +27,7 @@ func (objectService *ObjectService) PutObject(ctx context.Context, bucket string
 
 	}
 
-	exists, err := objectService.BucketService.BucketExists(context.Background(), bucket)
+	exists, err := objectService.BucketService.BucketExists(ctx, bucket)
 	if err != nil {
 		return nil, err
 	}
