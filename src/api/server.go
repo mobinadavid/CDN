@@ -50,6 +50,9 @@ func getNewRouter() *gin.Engine {
 	// Attach request id middleware.
 	router.Use(middlewares.RequestID)
 
+	// Zap logger
+	router.Use(middlewares.ZapLogger)
+
 	if isProduction {
 		// Trusted proxies.
 		_ = router.SetTrustedProxies([]string{"https://" + configs.Get("APP_HOST")})
