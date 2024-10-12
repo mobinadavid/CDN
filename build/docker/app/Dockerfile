@@ -20,7 +20,7 @@ RUN --mount=type=cache,target=/go/pkg/mod/cache \
     go build -o cdn-app main.go
 
 # Start a new stage from scratch
-FROM alpine:latest
+FROM docker-repo.omaxplatform.com/alpine:latest
 RUN apk update && apk add ca-certificates && rm -rf /var/cache/apk*
 WORKDIR /usr/local/bin/cdn-app
 COPY --from=builder /cdn-app/.env .

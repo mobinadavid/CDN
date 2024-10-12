@@ -46,7 +46,7 @@ services:
       - cdn
   # Nginx
   nginx:
-    image: nginx:stable-alpine
+    image: docker-repo.omaxplatform.com/nginx:stable-alpine
     container_name: nginx.$APP_HOST
     restart: unless-stopped
     environment:
@@ -67,7 +67,7 @@ services:
       - cdn
   # Redis
   redis:
-    image: redis:alpine
+    image: docker-repo.omaxplatform.com/redis:alpine
     ports:
       - "6379:6379"
     container_name: redis.${APP_HOST}
