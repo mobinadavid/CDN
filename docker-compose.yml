@@ -68,8 +68,6 @@ services:
   # Redis
   redis:
     image: docker-repo.omaxplatform.com/redis:alpine
-    ports:
-      - "6379:6379"
     container_name: redis.${APP_HOST}
     restart: unless-stopped
     command: redis-server /usr/local/etc/redis/redis.conf --requirepass ${REDIS_PASSWORD}
