@@ -54,6 +54,12 @@ func getNewRouter() *gin.Engine {
 
 	router.Use(middlewares.NewApiKeyMiddleware().Middleware())
 
+	// Attach i18n middleware.
+	router.Use(middlewares.I18n)
+
+	// Zap logger
+	router.Use(middlewares.ZapLogger)
+
 	if isProduction {
 		// Trusted proxies.
 		_ = router.SetTrustedProxies([]string{"https://" + configs.Get("APP_HOST")})

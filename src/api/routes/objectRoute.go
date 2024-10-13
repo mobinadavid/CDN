@@ -12,7 +12,7 @@ import (
 
 func ObjectRoutes(router *gin.RouterGroup) {
 	bucketService := minio2.NewBucketService(minio.GetInstance().GetMinio())
-	objectService := minio2.NewObjectService(minio.GetInstance().GetMinio())
+	objectService := minio2.NewObjectService(minio.GetInstance().GetMinio(), bucketService)
 	redisService := redis2.NewRedisService(redis.GetInstance().GetClient())
 	objectController := controllers.NewObjectController(bucketService, objectService)
 
