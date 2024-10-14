@@ -19,6 +19,5 @@ func BucketRoutes(router *gin.RouterGroup) {
 		storage.GET(":bucket/objects", bucketController.ListObject)
 		storage.DELETE(":bucket", bucketController.RemoveBucket)
 		storage.GET("", bucketController.ListBucket)
-
 	}
 }
