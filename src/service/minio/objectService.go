@@ -71,7 +71,7 @@ func (objectService *ObjectService) PutObject(ctx context.Context, bucket string
 			return nil, err
 		}
 
-		expiryNum := config.GetInstance().Get("PRE_SIGNED_URL_EXPIRE_TIME")
+		expiryNum := config.GetInstance().Get("MINIO_PRE_SIGNED_URL_EXPIRE_TIME")
 		expiry, err := strconv.Atoi(expiryNum)
 		if err != nil {
 			return nil, err

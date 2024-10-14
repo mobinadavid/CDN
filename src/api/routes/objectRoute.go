@@ -16,7 +16,7 @@ func ObjectRoutes(router *gin.RouterGroup) {
 	redisService := redis2.NewRedisService(redis.GetInstance().GetClient())
 	objectController := controllers.NewObjectController(bucketService, objectService)
 
-	storage := router.Group("objects")
+	storage := router.Group("buckets")
 	{
 		storage.POST("", middlewares.RateLimit(redisService), objectController.PutObject)
 		storage.GET(":bucket/files/:file", objectController.GetObject)
