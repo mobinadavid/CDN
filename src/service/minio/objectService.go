@@ -1,6 +1,7 @@
 package minio
 
 import (
+	"cdn/src/config"
 	"cdn/src/pkg/utils"
 	"context"
 	"errors"
@@ -9,6 +10,7 @@ import (
 	"mime/multipart"
 	"strconv"
 	"strings"
+	"time"
 )
 
 type ObjectService struct {
@@ -69,20 +71,24 @@ func (objectService *ObjectService) PutObject(ctx context.Context, bucket string
 			return nil, err
 		}
 
+		expiryNum := config.GetInstance().Get("PRE_SIGNED_URL_EXPIRE_TIME")
+		expiry, err := strconv.Atoi(expiryNum)
+		if err != nil {
+			return nil, err
+		}
+
+		preSignedURL, err := objectService.MinioClient.PresignedGetObject(ctx, bucket, uuidFileName,
+			time.Duration(expiry)*time.Minute, nil)
+		if err != nil {
+			return nil, err
+		}
+
 		uploadInfoList = append(uploadInfoList, map[string]string{
 			"original_file_name": strings.ToLower(file.Filename),
 			"size":               strconv.FormatInt(file.Size, 10),
 			"file_name":          fileName,
 			"folder":             folder,
-			"url": fmt.Sprintf("%s://%s/%s/%s/%s/%s/%s",
-				ctx.Value("Scheme"),
-				ctx.Value("Host"),
-				"app/api/v1",
-				"buckets",
-				bucket,
-				"files",
-				uuidFileName,
-			),
+			"url":                preSignedURL.String(),
 		})
 	}
 
