@@ -90,6 +90,8 @@ services:
 volumes:
   minio-data:
   redis-data:
+  log-data:
+
 # Networks
 networks:
   cdn:

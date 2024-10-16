@@ -89,6 +89,7 @@ services:
       - cdn
 # Volumes
 volumes:
+  log-data:
   minio-data:
     external: true
   redis-data:
