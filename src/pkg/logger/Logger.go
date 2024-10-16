@@ -5,106 +5,80 @@ import (
 	"fmt"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
+	"gopkg.in/natefinch/lumberjack.v2"
 	"os"
-	"path/filepath"
-	"time"
+	"strconv"
+	"sync"
 )
 
-var loggerInstance *zap.Logger
-var fileName string
+var (
+	loggerInstance Logger
+	once           sync.Once
+)
 
-func Init() error {
-	filePath := config.GetInstance().Get("LOG_FILE_PATH")
-	if err := ensureDirExists(filePath); err != nil {
-		return err
-	}
-
-	err := initLogger()
-	if err != nil {
-		return err
-	}
-
-	return nil
+type Logger interface {
+	GetLogger() *zap.Logger
+	SetLogger(logger *zap.Logger)
 }
 
-func GetInstance() *zap.Logger {
-	newFileName := time.Now().Format("2006-01-02")
-	if loggerInstance != nil && fileName == newFileName {
-		return loggerInstance
-	}
+type Log struct {
+	logger *zap.Logger
+}
 
-	_ = initLogger()
-	fileName = newFileName
+func Init() {
+	GetInstance()
+}
+
+func GetInstance() Logger {
+	once.Do(func() {
+		core := zapcore.NewTee(zapcore.NewCore(encoderFile(), zapcore.NewMultiWriteSyncer(getLogger(), getRotator()), zapcore.DebugLevel))
+		loggerInstance = &Log{
+			logger: zap.New(core, zap.AddCaller(), zap.AddStacktrace(zap.ErrorLevel)),
+		}
+	})
 	return loggerInstance
 }
 
-func getCustomProductionLogger(filePath string) (*zap.Logger, error) {
-	// New Production logger
-	zapConfig := zap.NewProductionConfig()
+func encoderFile() zapcore.Encoder {
+	conf := zap.NewProductionEncoderConfig()
+	conf.EncodeTime = zapcore.ISO8601TimeEncoder
+	return zapcore.NewJSONEncoder(conf)
+}
 
-	// Set the log level
-	zapConfig.Level = zap.NewAtomicLevelAt(getLogLevel())
+func getRotator() zapcore.WriteSyncer {
+	fileName := fmt.Sprintf("/log-data/%s", config.GetInstance().Get("LOG_FILE_NAME"))
 
-	// Set file path
-	zapConfig.OutputPaths = []string{filePath}
-	zapConfig.ErrorOutputPaths = []string{filePath}
-
-	// Build logger
-	logger, err := zapConfig.Build(
-		zap.AddCaller(),
-		zap.AddStacktrace(zap.ErrorLevel),
-	)
+	logSize, err := strconv.Atoi(config.GetInstance().Get("LOG_MAX_SIZE_MB"))
 	if err != nil {
-		return nil, err
+		logSize = 500
 	}
 
-	return logger, nil
-}
-
-func initLogger() error {
-	// create a log file for each day
-	fileDir := config.GetInstance().Get("LOG_FILE_PATH")
-	filePath := fmt.Sprintf("%slog-%s.log", fileDir, time.Now().Format("2006-01-02"))
-
-	logger, err := getCustomProductionLogger(filePath)
+	logMaxDay, err := strconv.Atoi(config.GetInstance().Get("LOG_MAX_DAY"))
 	if err != nil {
-		return err
+		logMaxDay = 30
 	}
 
-	loggerInstance = logger
-	return nil
+	return zapcore.AddSync(
+		&lumberjack.Logger{
+			Filename: fileName,
+			MaxSize:  logSize,
+			MaxAge:   logMaxDay,
+			Compress: true,
+		})
 }
 
-// getLogLevel reads the log level from an environment variable or defaults to InfoLevel
-func getLogLevel() zapcore.Level {
-	level := config.GetInstance().Get("LOG_LEVEL")
-	switch level {
-	case "debug":
-		return zapcore.DebugLevel
-	case "info":
-		return zapcore.InfoLevel
-	case "warn":
-		return zapcore.WarnLevel
-	case "error":
-		return zapcore.ErrorLevel
-	case "dpanic":
-		return zapcore.DPanicLevel
-	case "panic":
-		return zapcore.PanicLevel
-	case "fatal":
-		return zapcore.FatalLevel
-	default:
-		return zapcore.InfoLevel
-	}
+func getLogger() zapcore.WriteSyncer {
+	fileName := fmt.Sprintf("/log-data/%s", config.GetInstance().Get("LOG_FILE_NAME"))
+	file, _ := os.OpenFile(fileName, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+
+	// Return the rotator as the WriteSyncer
+	return zapcore.AddSync(file)
 }
 
-// ensureDirExists ensures that the directory for the log file exists
-func ensureDirExists(filePath string) error {
-	dir := filepath.Dir(filePath)
-	if _, err := os.Stat(dir); os.IsNotExist(err) {
-		if err = os.MkdirAll(dir, 0755); err != nil {
-			return err
-		}
-	}
-	return nil
+func (l *Log) GetLogger() *zap.Logger {
+	return l.logger
+}
+
+func (l *Log) SetLogger(logger *zap.Logger) {
+	l.logger = logger
 }

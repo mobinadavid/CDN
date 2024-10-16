@@ -18,7 +18,7 @@ func ZapLogger(c *gin.Context) {
 	duration := time.Since(start)
 
 	// Log request details
-	logger.GetInstance().Info("Incoming request",
+	logger.GetInstance().GetLogger().Info("Incoming request",
 		zap.String("type", "request"),
 		zap.String("method", c.Request.Method),
 		zap.String("url", c.Request.URL.String()),
