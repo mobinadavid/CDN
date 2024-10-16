@@ -26,7 +26,7 @@ func Init() error {
 func (m *Client) Connect() (err error) {
 	configs = config.GetInstance()
 
-	m.client, err = minio.New(fmt.Sprintf("%s:9000", configs.Get("MINIO_HOST")), &minio.Options{
+	m.client, err = minio.New(fmt.Sprintf("%s:%s", configs.Get("MINIO_HOST"), configs.Get("MINIO_PORT")), &minio.Options{
 		Creds:  credentials.NewStaticV4(configs.Get("MINIO_ACCESS_KEY"), configs.Get("MINIO_SECRET_KEY"), ""),
 		Secure: true,
 	})
