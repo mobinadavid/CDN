@@ -42,7 +42,6 @@ services:
       retries: 5
     volumes:
       - ./build/certs/minio:/etc/minio/certs:ro
-      - ./build/certs/cdn:/etc/cdn/certs:ro
       - minio-data:/data
     networks:
       - cdn
@@ -69,6 +68,7 @@ services:
     volumes:
       - ./build/certs/nginx:/etc/nginx/certs:ro
       - ./build/docker/nginx:/etc/nginx/templates:ro
+      - ./build/certs/cdn:/etc/cdn/certs:ro
     networks:
       - cdn
   # Redis
