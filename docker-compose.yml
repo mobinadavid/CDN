@@ -11,6 +11,8 @@ services:
       - ./build/certs/app:/etc/ssl/certs:ro
       - ./logs:/log-data
     tty: true
+    extra_hosts:
+      - "fund-cdn.omaxplatform.com:192.168.23.12"
     environment:
       TZ: ${APP_TZ}
     depends_on:
@@ -19,7 +21,8 @@ services:
       redis:
         condition: service_healthy
     networks:
-      - cdn
+      cdn:
+        ipv4_address: 192.168.23.10
   # Minio
   minio:
     image: docker-repo.omaxplatform.com/minio/minio:latest
@@ -44,7 +47,8 @@ services:
       - ./build/certs/minio:/etc/minio/certs:ro
       - minio-data:/data
     networks:
-      - cdn
+      cdn:
+        ipv4_address: 192.168.23.11
   # Nginx
   nginx:
     image: docker-repo.omaxplatform.com/nginx:stable-alpine
@@ -70,7 +74,8 @@ services:
       - ./build/docker/nginx:/etc/nginx/templates:ro
       - ./build/certs/cdn:/etc/cdn/certs:ro
     networks:
-      - cdn
+      cdn:
+        ipv4_address: 192.168.23.12
   # Redis
   redis:
     image: docker-repo.omaxplatform.com/redis:alpine
@@ -90,7 +95,8 @@ services:
       timeout: 5s
       retries: 5
     networks:
-      - cdn
+      cdn:
+        ipv4_address: 192.168.23.14
 # Volumes
 volumes:
   minio-data:
@@ -101,3 +107,6 @@ volumes:
 networks:
   cdn:
     driver: bridge
+    ipam:
+      config:
+        - subnet: 192.168.23.0/24  #
