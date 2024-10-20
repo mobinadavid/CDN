@@ -11,8 +11,9 @@ import (
 )
 
 func ObjectRoutes(router *gin.RouterGroup) {
-	bucketService := minio2.NewBucketService(minio.GetInstance().GetMinio())
-	objectService := minio2.NewObjectService(minio.GetInstance().GetMinio(), bucketService)
+	bucketService := minio2.NewBucketService(minio.GetInstance().GetInternalClient())
+	objectService := minio2.NewObjectService(minio.GetInstance().GetInternalClient(),
+		minio.GetInstance().GetCDNClient(), bucketService)
 	redisService := redis2.NewRedisService(redis.GetInstance().GetClient())
 	objectController := controllers.NewObjectController(bucketService, objectService)
 

@@ -14,13 +14,16 @@ import (
 )
 
 type ObjectService struct {
-	MinioClient   *minio.Client
-	BucketService *BucketService
+	ClientInternal *minio.Client
+	ClientCdn      *minio.Client
+	BucketService  *BucketService
 }
 
-func NewObjectService(minioClient *minio.Client, bucketService *BucketService) *ObjectService {
-	return &ObjectService{MinioClient: minioClient,
-		BucketService: bucketService}
+func NewObjectService(clientInternal *minio.Client, clientCdn *minio.Client, bucketService *BucketService) *ObjectService {
+	return &ObjectService{
+		ClientInternal: clientInternal,
+		ClientCdn:      clientCdn,
+		BucketService:  bucketService}
 }
 
 func (objectService *ObjectService) PutObject(ctx context.Context, bucket string, files []*multipart.FileHeader, folder string, tags ...map[string]string) ([]map[string]string, error) {
@@ -66,7 +69,7 @@ func (objectService *ObjectService) PutObject(ctx context.Context, bucket string
 			options.UserTags = tags[0]
 		}
 
-		_, err = objectService.MinioClient.PutObject(ctx, bucket, uuidFileName, src, file.Size, options)
+		_, err = objectService.ClientInternal.PutObject(ctx, bucket, uuidFileName, src, file.Size, options)
 		if err != nil {
 			return nil, err
 		}
@@ -77,7 +80,7 @@ func (objectService *ObjectService) PutObject(ctx context.Context, bucket string
 			return nil, err
 		}
 
-		preSignedURL, err := objectService.MinioClient.PresignedGetObject(ctx, bucket, uuidFileName,
+		preSignedURL, err := objectService.ClientCdn.PresignedGetObject(ctx, bucket, uuidFileName,
 			time.Duration(expiry)*time.Minute, nil)
 		if err != nil {
 			return nil, err
@@ -115,11 +118,11 @@ func (objectService *ObjectService) GetObject(ctx context.Context, bucket, fileN
 	} else {
 		objectName = fileName
 	}
-	return objectService.MinioClient.GetObject(ctx, bucket, objectName, options)
+	return objectService.ClientInternal.GetObject(ctx, bucket, objectName, options)
 }
 
 func (objectService *ObjectService) RemoveObjects(ctx context.Context, bucketName, objectName string, options minio.RemoveObjectOptions) error {
-	err := objectService.MinioClient.RemoveObject(ctx, bucketName, objectName, options)
+	err := objectService.ClientInternal.RemoveObject(ctx, bucketName, objectName, options)
 	return err
 }
 
@@ -150,7 +153,7 @@ func (objectService *ObjectService) GetTag(ctx context.Context, bucket string, t
 	}
 
 	// List objects in the bucket
-	objectCh := objectService.MinioClient.ListObjects(ctx, bucket, minio.ListObjectsOptions{
+	objectCh := objectService.ClientInternal.ListObjects(ctx, bucket, minio.ListObjectsOptions{
 		Recursive: true,
 	})
 
@@ -159,7 +162,7 @@ func (objectService *ObjectService) GetTag(ctx context.Context, bucket string, t
 			return nil, object.Err
 		}
 
-		tag, err := objectService.MinioClient.GetObjectTagging(ctx, bucket, object.Key, minio.GetObjectTaggingOptions{})
+		tag, err := objectService.ClientInternal.GetObjectTagging(ctx, bucket, object.Key, minio.GetObjectTaggingOptions{})
 		if err != nil {
 			return nil, err
 		}
@@ -221,11 +224,11 @@ func (objectService *ObjectService) ObjectExists(existingObject []string, object
 }
 
 func (objectService *ObjectService) RemoveObjectTagging(background context.Context, bucket string, file string, options minio.RemoveObjectTaggingOptions) error {
-	err := objectService.MinioClient.RemoveObjectTagging(background, bucket, file, options)
+	err := objectService.ClientInternal.RemoveObjectTagging(background, bucket, file, options)
 	return err
 }
 func (objectService *ObjectService) GetObjectTagging(background context.Context, bucket string, file string, options minio.GetObjectTaggingOptions) error {
-	tags, err := objectService.MinioClient.GetObjectTagging(background, bucket, file, options)
+	tags, err := objectService.ClientCdn.GetObjectTagging(background, bucket, file, options)
 	if tags == nil || err != nil {
 		return err
 	}
