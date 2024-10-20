@@ -12,7 +12,7 @@ release:
     - sed -i "s/MINIO_HOST=.*/MINIO_HOST=$MINIO_HOST/g" .env
     - sed -i "s/REDIS_HOST=.*/REDIS_HOST=$REDIS_HOST/g" .env
     - sed -i "s/APP_API_KEY=.*/APP_API_KEY=$APP_API_KEY/g" .env
-    - mkdir -p build/certs/{app,nginx,minio,redis}
+    - mkdir -p build/certs/{app,nginx,minio,redis,cdn}
     - cp /etc/letsencrypt/live/$APP_HOST/* build/certs/app
     - cp /etc/letsencrypt/live/$APP_HOST/* build/certs/nginx
     - cp /etc/letsencrypt/live/$APP_HOST/* build/certs/redis
