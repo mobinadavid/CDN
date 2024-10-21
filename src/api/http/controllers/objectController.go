@@ -163,7 +163,7 @@ func (objectController *ObjectController) GetPreSigned(c *gin.Context) {
 		return
 	}
 
-	preSignedURL, err := objectController.objectService.MinioClient.PresignedGetObject(context.Background(), bucket, fileName, time.Duration(expiry)*time.Minute, nil)
+	preSignedURL, err := objectController.objectService.ClientInternal.PresignedGetObject(context.Background(), bucket, fileName, time.Duration(expiry)*time.Minute, nil)
 	if err != nil {
 		response.Api(c).SetStatusCode(http.StatusUnprocessableEntity).Send()
 		return
