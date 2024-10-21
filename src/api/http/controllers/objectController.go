@@ -174,10 +174,8 @@ func (objectController *ObjectController) GetPreSigned(c *gin.Context) {
 		SetMessage(i18n.Localize(c.GetString("locale"), "request-successful")).
 		SetStatusCode(http.StatusOK).
 		SetData(map[string]interface{}{
-			"file": map[string]interface{}{
-				"file_name": fileName,
-				"url":       preSignedURL.String(),
-			},
+			"file_name": fileName,
+			"url":       preSignedURL.String(),
 		},
 		).Send()
 }
