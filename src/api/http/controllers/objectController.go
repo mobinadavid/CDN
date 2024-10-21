@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"cdn/src/api/http/response"
+	"cdn/src/config"
 	"cdn/src/pkg/i18n"
 	"cdn/src/pkg/utils"
 	"cdn/src/service/minio"
@@ -12,6 +13,7 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
+	"time"
 )
 
 type ObjectController struct {
@@ -130,6 +132,51 @@ func (objectController *ObjectController) GetObject(c *gin.Context) {
 		response.Api(c).SetStatusCode(http.StatusInternalServerError).Send()
 		return
 	}
+}
+
+// GetPreSigned handles get preSigned url of object.
+// @Summary Get PreSigned
+// @Description Gets object data with specified filename.
+// @Param bucket query string true "bucket"
+// @Param file query string true "file"
+// @Tags Object
+// @Accept  json
+// @Produce  json
+// @Success 200 {object} requests.successGetObjectRequest
+// @Failure 400 {object} requests.failureGetObjectRequest
+// @Router /buckets/:bucket/files/url/:file [get]
+func (objectController *ObjectController) GetPreSigned(c *gin.Context) {
+	bucket := c.Param("bucket")
+	fileName := c.Param("file")
+
+	file, err := objectController.objectService.GetObject(c, bucket, fileName, minio2.GetObjectOptions{})
+	if err != nil {
+		response.Api(c).SetStatusCode(http.StatusNotFound).Send()
+		return
+	}
+	defer file.Close()
+
+	expiryNum := config.GetInstance().Get("MINIO_PRE_SIGNED_URL_EXPIRE_TIME")
+	expiry, err := strconv.Atoi(expiryNum)
+	if err != nil {
+		response.Api(c).SetStatusCode(http.StatusNotFound).Send()
+		return
+	}
+
+	preSignedURL, err := objectController.objectService.MinioClient.PresignedGetObject(context.Background(), bucket, fileName, time.Duration(expiry)*time.Minute, nil)
+	if err != nil {
+		response.Api(c).SetStatusCode(http.StatusUnprocessableEntity).Send()
+		return
+	}
+
+	// Return response.
+	response.Api(c).
+		SetMessage(i18n.Localize(c.GetString("locale"), "request-successful")).
+		SetStatusCode(http.StatusOK).
+		SetData(map[string]interface{}{
+			"file_name": fileName,
+			"url":       preSignedURL,
+		}).Send()
 }
 
 // RemoveObjects handles objects remove requests

@@ -21,10 +21,10 @@ func ObjectRoutes(router *gin.RouterGroup) {
 	{
 		storage.POST("", middlewares.RateLimit(redisService), objectController.PutObject)
 		storage.GET(":bucket/files/:file", objectController.GetObject)
+		storage.GET(":bucket/files/url/:file", objectController.GetPreSigned)
 		storage.DELETE(":bucket/objects", objectController.RemoveObjects)
 		storage.DELETE(":bucket/files/:file", objectController.RemoveObject)
 		storage.GET(":bucket/tags/:tag", objectController.GetTag)
 		storage.DELETE(":bucket/objects/:object", objectController.RemoveTag)
-
 	}
 }
