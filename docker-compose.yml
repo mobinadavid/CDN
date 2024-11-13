@@ -82,8 +82,6 @@ services:
     image: docker-repo.omaxplatform.com/redis:alpine
     container_name: redis.${APP_HOST}
     restart: unless-stopped
-    ports:
-      - ${REDIS_PORT}:${REDIS_PORT}
     command: redis-server /usr/local/etc/redis/redis.conf --requirepass ${REDIS_PASSWORD}
     volumes:
       - ./build/certs/redis:/etc/redis/certs:ro
