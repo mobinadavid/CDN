@@ -7,14 +7,15 @@ services:
       dockerfile: build/docker/app/Dockerfile
     container_name: app.$APP_HOST
     restart: unless-stopped
-    volumes:
-      - ./build/certs/app:/etc/ssl/certs:ro
-      - ./logs:/log-data
     tty: true
     extra_hosts:
       - "fund-cdn.omaxplatform.com:192.168.23.12"
     environment:
       TZ: ${APP_TZ}
+      LOG_DIR_NAME: /${LOG_DIR_NAME}
+    volumes:
+      - ./${LOG_DIR_NAME}:/${LOG_DIR_NAME}
+      - ./build/certs/app:/etc/ssl/certs:ro
     depends_on:
       minio:
         condition: service_healthy
@@ -81,6 +82,8 @@ services:
     image: docker-repo.omaxplatform.com/redis:alpine
     container_name: redis.${APP_HOST}
     restart: unless-stopped
+    ports:
+      - ${REDIS_PORT}:${REDIS_PORT}
     command: redis-server /usr/local/etc/redis/redis.conf --requirepass ${REDIS_PASSWORD}
     volumes:
       - ./build/certs/redis:/etc/redis/certs:ro
@@ -101,7 +104,7 @@ services:
 volumes:
   minio-data:
   redis-data:
-  log-data:
+  log-cdn:
 
 # Networks
 networks:
