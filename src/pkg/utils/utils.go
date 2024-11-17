@@ -2,11 +2,11 @@ package utils
 
 import (
 	"cdn/src/config"
-	"errors"
 	"fmt"
 	"github.com/google/uuid"
 	"mime/multipart"
 	"path/filepath"
+	"strconv"
 	"strings"
 )
 
@@ -17,14 +17,21 @@ func GenerateUUIDFileName(originalFileName string) string {
 }
 
 func ValidateFiles(files []*multipart.FileHeader) error {
-	if len(files) > 2 {
-		return errors.New("too many files! Maximum 2 files allowed per request")
+	fileNumber, err := strconv.Atoi(config.GetInstance().Get("MINIO_MAX_FILES"))
+	if err != nil {
+		fileNumber = 2
+	}
+	if len(files) > fileNumber {
+		return fmt.Errorf("too many files! Maximum %d files allowed per request", fileNumber)
 	}
 
 	for _, file := range files {
-
-		if file.Size > 2*1024*1024 {
-			return errors.New("maximum 2MB files allowed")
+		fileSize, err := strconv.Atoi(config.GetInstance().Get("MINIO_FILES_SIZE_MB"))
+		if err != nil {
+			fileSize = 2
+		}
+		if file.Size > int64(fileSize)*1024*1024 {
+			return fmt.Errorf("maximum file size of %d MB is allowed", fileSize)
 		}
 
 		ext := strings.ToLower(strings.TrimSpace(filepath.Ext(file.Filename)))
