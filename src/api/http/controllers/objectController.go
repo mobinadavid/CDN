@@ -163,7 +163,10 @@ func (objectController *ObjectController) GetPreSigned(c *gin.Context) {
 		return
 	}
 
-	preSignedURL, err := objectController.objectService.ClientCdn.PresignedGetObject(context.Background(), bucket, fileName, time.Duration(expiry)*time.Minute, nil)
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Minute)
+	defer cancel()
+
+	preSignedURL, err := objectController.objectService.ClientCdn.PresignedGetObject(ctx, bucket, fileName, time.Duration(expiry)*time.Minute, nil)
 	if err != nil {
 		response.Api(c).SetStatusCode(http.StatusUnprocessableEntity).Send()
 		return
