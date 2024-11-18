@@ -4,10 +4,12 @@ import (
 	_ "cdn/src/api/http/requests"
 	"cdn/src/api/http/response"
 	"cdn/src/pkg/i18n"
+	"cdn/src/pkg/logger"
 	"cdn/src/service/minio"
 	"context"
 	"github.com/gin-gonic/gin"
 	minio2 "github.com/minio/minio-go/v7"
+	"go.uber.org/zap"
 	"net/http"
 )
 
@@ -37,7 +39,9 @@ func (bucketController *BucketController) MakeBucket(c *gin.Context) {
 
 	err := bucketController.bucketService.MakeBucket(context.Background(), bucketName, minio2.MakeBucketOptions{})
 	if err != nil {
+		logger.GetInstance().Error(err.Error(), zap.String("Method", "Make Bucket"))
 		response.Api(c).SetMessage(err.Error()).SetStatusCode(http.StatusInternalServerError).Send()
+		return
 	}
 
 	// Return response.
@@ -65,6 +69,7 @@ func (bucketController *BucketController) RemoveBucket(c *gin.Context) {
 
 	err := bucketController.bucketService.RemoveBucket(c, bucketName)
 	if err != nil {
+		logger.GetInstance().Error(err.Error(), zap.String("Method", "Remove Bucket"))
 		response.Api(c).SetMessage(err.Error()).SetStatusCode(http.StatusInternalServerError).Send()
 		return
 	}
@@ -96,6 +101,7 @@ func (bucketController *BucketController) ListObject(c *gin.Context) {
 		Recursive: true,
 	})
 	if err != nil {
+		logger.GetInstance().Error(err.Error(), zap.String("Method", "List Object"))
 		response.Api(c).SetMessage(err.Error()).SetStatusCode(http.StatusInternalServerError).Send()
 		return
 	}
@@ -128,6 +134,7 @@ func (bucketController *BucketController) ListObject(c *gin.Context) {
 func (bucketController *BucketController) ListBucket(c *gin.Context) {
 	buckets, err := bucketController.bucketService.ListBucket(c)
 	if err != nil {
+		logger.GetInstance().Error(err.Error(), zap.String("Method", "List Bucket"))
 		response.Api(c).SetMessage(err.Error()).SetStatusCode(http.StatusInternalServerError).Send()
 		return
 	}

@@ -7,11 +7,13 @@ services:
       dockerfile: build/docker/app/Dockerfile
     container_name: app.$APP_HOST
     restart: unless-stopped
-    volumes:
-      - ./build/certs/app:/etc/ssl/certs:ro
     tty: true
     environment:
       TZ: ${APP_TZ}
+      LOG_DIR_NAME: /${LOG_DIR_NAME}
+    volumes:
+      - ./${LOG_DIR_NAME}:/${LOG_DIR_NAME}
+      - ./build/certs/app:/etc/ssl/certs:ro
     depends_on:
       minio:
         condition: service_healthy
@@ -89,7 +91,7 @@ services:
       - cdn
 # Volumes
 volumes:
-  log-data:
+  log-cdn:
   minio-data:
     external: true
   redis-data:
