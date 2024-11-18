@@ -25,7 +25,7 @@ func NewIPMiddleware() *IPMiddleware {
 func (middleware *IPMiddleware) Middleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		ip := c.Request.RemoteAddr
-		if forwarded := c.Request.Header.Get("X-Forwarded-For"); forwarded != "" {
+		if forwarded := c.GetHeader("x-forwarded-for"); forwarded != "" {
 			ip = strings.Split(forwarded, ",")[0]
 		}
 

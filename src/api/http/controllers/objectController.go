@@ -4,11 +4,13 @@ import (
 	"cdn/src/api/http/response"
 	"cdn/src/config"
 	"cdn/src/pkg/i18n"
+	"cdn/src/pkg/logger"
 	"cdn/src/pkg/utils"
 	"cdn/src/service/minio"
 	"context"
 	"github.com/gin-gonic/gin"
 	minio2 "github.com/minio/minio-go/v7"
+	"go.uber.org/zap"
 	"io"
 	"net/http"
 	"strconv"
@@ -40,6 +42,7 @@ func NewObjectController(bucketService *minio.BucketService, objectService *mini
 func (objectController *ObjectController) PutObject(c *gin.Context) {
 	form, err := c.MultipartForm()
 	if err != nil {
+		logger.GetInstance().Error(err.Error(), zap.String("Method", "Put Object"))
 		response.Api(c).SetStatusCode(http.StatusUnprocessableEntity).Send()
 		return
 	}
@@ -49,6 +52,7 @@ func (objectController *ObjectController) PutObject(c *gin.Context) {
 	tagsStr := c.PostForm("tag")
 
 	if err := utils.ValidateFiles(form.File["files[]"]); err != nil {
+		logger.GetInstance().Error(err.Error(), zap.String("Method", "Put Object"))
 		response.Api(c).SetMessage(err.Error()).SetStatusCode(http.StatusUnprocessableEntity).Send()
 		return
 	}
@@ -76,6 +80,7 @@ func (objectController *ObjectController) PutObject(c *gin.Context) {
 	}
 
 	if err != nil {
+		logger.GetInstance().Error(err.Error(), zap.String("Method", "Put Object"))
 		response.Api(c).
 			SetMessage(err.Error()).
 			SetStatusCode(http.StatusInternalServerError).
@@ -110,6 +115,7 @@ func (objectController *ObjectController) GetObject(c *gin.Context) {
 
 	file, err := objectController.objectService.GetObject(c, bucket, fileName, minio2.GetObjectOptions{})
 	if err != nil {
+		logger.GetInstance().Error(err.Error(), zap.String("Method", "Get Object"))
 		response.Api(c).SetStatusCode(http.StatusNotFound).Send()
 		return
 	}
@@ -118,6 +124,7 @@ func (objectController *ObjectController) GetObject(c *gin.Context) {
 
 	stat, err := file.Stat()
 	if err != nil {
+		logger.GetInstance().Error(err.Error(), zap.String("Method", "Get Object"))
 		response.Api(c).SetStatusCode(http.StatusNotFound).Send()
 		return
 	}
@@ -129,6 +136,7 @@ func (objectController *ObjectController) GetObject(c *gin.Context) {
 	_, err = io.Copy(c.Writer, file)
 
 	if err != nil {
+		logger.GetInstance().Error(err.Error(), zap.String("Method", "Get Object"))
 		response.Api(c).SetStatusCode(http.StatusInternalServerError).Send()
 		return
 	}
@@ -151,6 +159,7 @@ func (objectController *ObjectController) GetPreSigned(c *gin.Context) {
 
 	file, err := objectController.objectService.GetObject(c, bucket, fileName, minio2.GetObjectOptions{})
 	if err != nil {
+		logger.GetInstance().Error(err.Error(), zap.String("Method", "Get Presigned"))
 		response.Api(c).SetStatusCode(http.StatusNotFound).Send()
 		return
 	}
@@ -159,6 +168,7 @@ func (objectController *ObjectController) GetPreSigned(c *gin.Context) {
 	expiryNum := config.GetInstance().Get("MINIO_PRE_SIGNED_URL_EXPIRE_TIME")
 	expiry, err := strconv.Atoi(expiryNum)
 	if err != nil {
+		logger.GetInstance().Error(err.Error(), zap.String("Method", "Get Presigned"))
 		response.Api(c).SetStatusCode(http.StatusNotFound).Send()
 		return
 	}
@@ -168,6 +178,7 @@ func (objectController *ObjectController) GetPreSigned(c *gin.Context) {
 
 	preSignedURL, err := objectController.objectService.ClientCdn.PresignedGetObject(ctx, bucket, fileName, time.Duration(expiry)*time.Minute, nil)
 	if err != nil {
+		logger.GetInstance().Error(err.Error(), zap.String("Method", "Get Presigned"))
 		response.Api(c).SetStatusCode(http.StatusUnprocessableEntity).Send()
 		return
 	}
@@ -200,8 +211,10 @@ func (objectController *ObjectController) RemoveObjects(c *gin.Context) {
 		Recursive: true,
 	})
 	if err != nil {
+		logger.GetInstance().Error(err.Error(), zap.String("Method", "Remove Objects"))
 		response.Api(c).SetStatusCode(http.StatusInternalServerError).Send()
 	}
+
 	// Collect object names
 	objectList := make([]string, 0, len(objects))
 	for _, object := range objects {
@@ -212,6 +225,7 @@ func (objectController *ObjectController) RemoveObjects(c *gin.Context) {
 	for _, objectName := range objectList {
 		errCh := objectController.objectService.RemoveObjects(context.Background(), bucket, objectName, minio2.RemoveObjectOptions{})
 		if errCh != nil {
+			logger.GetInstance().Error(errCh.Error(), zap.String("Method", "Remove Objects"))
 			response.Api(c).SetMessage(errCh.Error()).SetStatusCode(http.StatusInternalServerError).Send()
 			return
 		}
@@ -251,8 +265,10 @@ func (objectController *ObjectController) RemoveObject(c *gin.Context) {
 		Recursive: true,
 	})
 	if err != nil {
+		logger.GetInstance().Error(err.Error(), zap.String("Method", "Remove Object"))
 		response.Api(c).SetMessage(err.Error()).SetStatusCode(http.StatusInternalServerError).Send()
 	}
+
 	// Collect object names
 	existingObjectList := make([]string, 0, len(objects))
 	for _, object := range objects {
@@ -272,6 +288,7 @@ func (objectController *ObjectController) RemoveObject(c *gin.Context) {
 	for _, objectName := range objectList {
 		errCh := objectController.objectService.RemoveObjects(c, bucket, objectName, minio2.RemoveObjectOptions{})
 		if errCh != nil {
+			logger.GetInstance().Error(errCh.Error(), zap.String("Method", "Remove Object"))
 			response.Api(c).SetMessage(errCh.Error()).SetStatusCode(http.StatusInternalServerError).Send()
 			return
 		}
@@ -309,6 +326,7 @@ func (objectController *ObjectController) GetTag(c *gin.Context) {
 
 	urls, err := objectController.objectService.GetTag(ctx, bucket, tagsStr)
 	if err != nil {
+		logger.GetInstance().Error(err.Error(), zap.String("Method", "Get Tag"))
 		response.Api(c).SetMessage(err.Error()).SetStatusCode(http.StatusInternalServerError).Send()
 		return
 	}
@@ -345,6 +363,7 @@ func (objectController *ObjectController) RemoveTag(c *gin.Context) {
 
 	exists, err := objectController.bucketService.BucketExists(context.Background(), bucket)
 	if err != nil {
+		logger.GetInstance().Error(err.Error(), zap.String("Method", "Remove Tag"))
 		response.Api(c).SetMessage(err.Error()).SetStatusCode(http.StatusUnprocessableEntity).Send()
 		return
 	}
@@ -360,12 +379,14 @@ func (objectController *ObjectController) RemoveTag(c *gin.Context) {
 
 	err = objectController.objectService.GetObjectTagging(context.Background(), bucket, file, minio2.GetObjectTaggingOptions{})
 	if err != nil {
+		logger.GetInstance().Error(err.Error(), zap.String("Method", "Remove Tag"))
 		response.Api(c).SetMessage(err.Error()).SetStatusCode(http.StatusInternalServerError).Send()
 		return
 	}
 
 	err = objectController.objectService.RemoveObjectTagging(context.Background(), bucket, file, minio2.RemoveObjectTaggingOptions{})
 	if err != nil {
+		logger.GetInstance().Error(err.Error(), zap.String("Method", "Remove Tag"))
 		response.Api(c).SetMessage(err.Error()).SetStatusCode(http.StatusUnprocessableEntity).Send()
 		return
 	}
