@@ -90,7 +90,9 @@ services:
 # Volumes
 volumes:
   minio-data:
+    external: true
   redis-data:
+    external: true
 # Networks
 networks:
   cdn:
