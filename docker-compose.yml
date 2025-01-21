@@ -73,6 +73,8 @@ services:
       - app
     ports:
       - ${NGINX_LISTENING_PORT}:${NGINX_LISTENING_PORT}
+      - ${OPENRESTY_REDIRECT_PORT}:${OPENRESTY_REDIRECT_PORT}
+      - ${OPENRESTY_PUBLIC_REDIRECT_PORT}:${OPENRESTY_PUBLIC_REDIRECT_PORT}
     volumes:
       - ./build/certs/nginx:/etc/nginx/certs:ro
       - ./build/docker/nginx:/etc/nginx/templates:ro
