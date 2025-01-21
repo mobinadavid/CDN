@@ -1,4 +1,4 @@
-FROM docker-repo.omaxplatform.com/golang:alpine AS builder
+FROM internal-docker.omaxplatform.com/golang:alpine AS builder
 LABEL maintainer="Ali Khedmati"
 ENV CGO_ENABLED 0 \
     GOPATH /go \
@@ -9,7 +9,7 @@ ENV CGO_ENABLED 0 \
 WORKDIR /cdn-app
 COPY . /cdn-app
 # Install Dependencies
-ENV GOPROXY=http://nexus-repo.omaxplatform.com/repository/go-proxy,direct
+ENV GOPROXY=https://internal-nexus.omaxplatform.com/repository/go-proxy,direct
 RUN --mount=type=cache,target=/go/pkg/mod/cache \
     --mount=type=cache,target=/go-build \
    go mod download
@@ -19,7 +19,7 @@ RUN --mount=type=cache,target=/go/pkg/mod/cache \
     go build -o cdn-app main.go
 
 # Start a new stage from scratch
-FROM docker-repo.omaxplatform.com/alpine:latest
+FROM internal-docker.omaxplatform.com/alpine:latest
 RUN apk update && apk add ca-certificates && rm -rf /var/cache/apk*
 WORKDIR /usr/local/bin/cdn-app
 COPY --from=builder /cdn-app/.env .
