@@ -106,8 +106,11 @@ services:
 # Volumes
 volumes:
   minio-data:
+    external: true
   redis-data:
+    external: true
   log-cdn:
+    external: true
 
 # Networks
 networks:
