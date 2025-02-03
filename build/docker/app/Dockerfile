@@ -8,6 +8,8 @@ ENV CGO_ENABLED 0 \
     GO111MODULE=on
 WORKDIR /cdn-app
 COPY . /cdn-app
+COPY .netrc /root/.netrc
+RUN chmod 600 /root/.netrc
 # Install Dependencies
 ENV GOPROXY=https://internal-nexus.omaxplatform.com/repository/go-proxy,direct
 RUN --mount=type=cache,target=/go/pkg/mod/cache \
