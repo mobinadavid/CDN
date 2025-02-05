@@ -5,7 +5,6 @@ import (
 	"cdn/src/pkg/utils"
 	"context"
 	"errors"
-	"fmt"
 	"github.com/minio/minio-go/v7"
 	"mime/multipart"
 	"strconv"
@@ -179,11 +178,7 @@ func (objectService *ObjectService) GetTag(ctx context.Context, bucket string, t
 
 		if tagsMatch(existingTag, tags) {
 			uploadInfoList = append(uploadInfoList, map[string]string{
-				"url": fmt.Sprintf("https://%s/%s/%s",
-					config.GetInstance().Get("PUBLIC_CDN_SERVER_NAME"),
-					bucket,
-					object.Key,
-				),
+				"name": object.Key,
 			})
 		}
 	}

@@ -324,7 +324,7 @@ func (objectController *ObjectController) GetTag(c *gin.Context) {
 	ctx = context.WithValue(ctx, "Host", c.Request.Host)
 	ctx = context.WithValue(ctx, "Scheme", c.GetHeader("Scheme"))
 
-	urls, err := objectController.objectService.GetTag(ctx, bucket, tagsStr)
+	names, err := objectController.objectService.GetTag(ctx, bucket, tagsStr)
 	if err != nil {
 		logger.GetInstance().Error(err.Error(), zap.String("Method", "Get Tag"))
 		response.Api(c).SetMessage(err.Error()).SetStatusCode(http.StatusInternalServerError).Send()
@@ -336,7 +336,7 @@ func (objectController *ObjectController) GetTag(c *gin.Context) {
 		SetMessage(i18n.Localize(c.GetString("locale"), "request-successful")).
 		SetStatusCode(http.StatusOK).
 		SetData(map[string]interface{}{
-			"objects": urls,
+			"objects": names,
 		}).
 		Send()
 }
