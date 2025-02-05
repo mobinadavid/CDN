@@ -179,13 +179,9 @@ func (objectService *ObjectService) GetTag(ctx context.Context, bucket string, t
 
 		if tagsMatch(existingTag, tags) {
 			uploadInfoList = append(uploadInfoList, map[string]string{
-				"url": fmt.Sprintf("%s://%s/%s/%s/%s/%s/%s",
-					ctx.Value("Scheme"),
-					ctx.Value("Host"),
-					"api/v1",
-					"buckets",
+				"url": fmt.Sprintf("https://%s/%s/%s",
+					config.GetInstance().Get("PUBLIC_CDN_SERVER_NAME"),
 					bucket,
-					"files",
 					object.Key,
 				),
 			})

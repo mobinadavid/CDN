@@ -98,7 +98,8 @@ func (bucketController *BucketController) ListObject(c *gin.Context) {
 	bucketName := c.Param("bucket")
 
 	objects, err := bucketController.bucketService.ListObjects(c, bucketName, minio2.ListObjectsOptions{
-		Recursive: true,
+		Recursive:    true,
+		WithMetadata: true,
 	})
 	if err != nil {
 		logger.GetInstance().Error(err.Error(), zap.String("Method", "List Object"))
