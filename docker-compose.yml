@@ -1,0 +1,112 @@
+# Services
+services:
+  # App
+  app:
+    build:
+      context: .
+      dockerfile: build/docker/app/Dockerfile
+    container_name: app.$APP_HOST
+    restart: unless-stopped
+    volumes:
+      - ./build/certs/app:/etc/ssl/certs:ro
+      - ./logs:/log-data
+    tty: true
+    extra_hosts:
+      - "fund-cdn.omaxplatform.com:192.168.23.12"
+    environment:
+      TZ: ${APP_TZ}
+    depends_on:
+      minio:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      cdn:
+        ipv4_address: 192.168.23.10
+  # Minio
+  minio:
+    image: docker-repo.omaxplatform.com/minio/minio:latest
+    container_name: minio.$APP_HOST
+    restart: unless-stopped
+    ports:
+      - ${MINIO_PORT}:9000
+    command: server --certs-dir /etc/minio/certs --console-address :9001 /data
+    tty: true
+    environment:
+      MINIO_SERVER_URL: "https://minio.$APP_HOST:9000"
+      MINIO_BROWSER_REDIRECT_URL: "https://$APP_HOST/dashboard"
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER:-root}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:-myawesomepassword}
+      TZ: ${APP_TZ}
+    healthcheck:
+      test: ["CMD-SHELL", "mc alias set minio https://minio.$APP_HOST:9000 ${MINIO_ROOT_USER} ${MINIO_ROOT_PASSWORD} && mc admin info minio"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    volumes:
+      - ./build/certs/minio:/etc/minio/certs:ro
+      - minio-data:/data
+    networks:
+      cdn:
+        ipv4_address: 192.168.23.11
+  # Nginx
+  nginx:
+    image: docker-repo.omaxplatform.com/nginx:stable-alpine
+    container_name: nginx.$APP_HOST
+    restart: unless-stopped
+    environment:
+      TZ: ${APP_TZ}
+      SERVER_NAME: ${APP_HOST}
+      CDN_SERVER_NAME: ${MINIO_CDN_HOST}
+      CDN_NGINX_PORT: ${MINIO_CDN_NGINX_PORT}
+      MINIO_PORT: ${MINIO_PORT_INTERNAL}
+      MINIO_HOST: ${MINIO_HOST}
+      SERVER_PORT: ${NGINX_LISTENING_PORT}
+      APP_PROXY_PASS: https://app.${APP_HOST}:${APP_PORT}
+      DASHBOARD_PROXY_PASS: https://minio.${APP_HOST}:9001
+    tty: true
+    depends_on:
+      - app
+    ports:
+      - ${NGINX_LISTENING_PORT}:${NGINX_LISTENING_PORT}
+    volumes:
+      - ./build/certs/nginx:/etc/nginx/certs:ro
+      - ./build/docker/nginx:/etc/nginx/templates:ro
+      - ./build/certs/cdn:/etc/cdn/certs:ro
+    networks:
+      cdn:
+        ipv4_address: 192.168.23.12
+  # Redis
+  redis:
+    image: docker-repo.omaxplatform.com/redis:alpine
+    container_name: redis.${APP_HOST}
+    restart: unless-stopped
+    command: redis-server /usr/local/etc/redis/redis.conf --requirepass ${REDIS_PASSWORD}
+    volumes:
+      - ./build/certs/redis:/etc/redis/certs:ro
+      - ./build/docker/redis/redis.conf:/usr/local/etc/redis/redis.conf:ro
+      - redis-data:/data
+    tty: true
+    environment:
+      TZ: ${APP_TZ}
+    healthcheck:
+      test: [ "CMD-SHELL", "redis-cli -a ${REDIS_PASSWORD} --tls ping" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      cdn:
+        ipv4_address: 192.168.23.14
+# Volumes
+volumes:
+  minio-data:
+  redis-data:
+  log-data:
+
+# Networks
+networks:
+  cdn:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 192.168.23.0/24  #

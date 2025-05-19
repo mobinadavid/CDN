@@ -1,0 +1,27 @@
+stages:
+  - release
+
+# Release stage
+release:
+  stage: release
+  script:
+    - cd $CI_PROJECT_DIR
+    - cp .env.example .env
+    - sed -i "s/APP_HOST=.*/APP_HOST=$APP_HOST/g" .env
+    - sed -i "s/MINIO_CDN_HOST=.*/MINIO_CDN_HOST=$MINIO_CDN_HOST/g" .env
+    - sed -i "s/MINIO_HOST=.*/MINIO_HOST=$MINIO_HOST/g" .env
+    - sed -i "s/REDIS_HOST=.*/REDIS_HOST=$REDIS_HOST/g" .env
+    - sed -i "s/APP_API_KEY=.*/APP_API_KEY=$APP_API_KEY/g" .env
+    - mkdir -p build/certs/{app,nginx,minio,redis,cdn}
+    - cp /etc/letsencrypt/live/$APP_HOST/* build/certs/app
+    - cp /etc/letsencrypt/live/$APP_HOST/* build/certs/nginx
+    - cp /etc/letsencrypt/live/$APP_HOST/* build/certs/redis
+    - cp /etc/letsencrypt/live/$APP_HOST/privkey.pem build/certs/minio/private.key
+    - cp /etc/letsencrypt/live/$APP_HOST/fullchain.pem build/certs/minio/public.crt
+    - cp /etc/letsencrypt/live/$MINIO_CDN_HOST/fullchain.pem build/certs/cdn/public.crt
+    - cp /etc/letsencrypt/live/$MINIO_CDN_HOST/privkey.pem build/certs/cdn/private.key
+    - chmod 755 build/certs/redis/*
+    - docker compose down
+    - docker compose up -d --build
+  only:
+    - dev

@@ -1,0 +1,3 @@
+{"level":"info","ts":1728892475.7439063,"caller":"bootstrap/bootstrap.go:28","msg":"Initialized Successfully.","Service":"Logger","timestamp":1728892475.7439048}
+{"level":"info","ts":1728892475.74485,"caller":"bootstrap/bootstrap.go:35","msg":"Initialized Successfully.","Service":"I18n","timestamp":1728892475.7448492}
+{"level":"info","ts":1728892475.744902,"caller":"bootstrap/bootstrap.go:42","msg":"Initialized Successfully.","Service":"Minio","timestamp":1728892475.7449014}
